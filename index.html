@@ -19,20 +19,39 @@
     </script>
     <style>
         /* Simple scrollbar styling */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #888; border-radius: 6px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
-        .required-label::after { content: '*'; color: red; margin-left: 2px; }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 6px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        /* Style for required fields */
+        .required-label::after {
+            content: '*';
+            color: red;
+            margin-left: 2px;
+        }
+        /* Styling for dashboard cards */
         .stat-card {
-            background-color: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.75rem;
+            background-color: #f9fafb; /* bg-gray-50 */
+            border: 1px solid #e5e7eb; /* border-gray-200 */
+            border-radius: 0.75rem; /* rounded-xl */
             padding: 1rem;
             text-align: center;
             transition: all 0.2s ease-in-out;
         }
-        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        /* Basic spinner for loading state */
         .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
             border-left-color: #4f46e5;
@@ -41,15 +60,8 @@
             height: 40px;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        /* Numeric input arrows removal */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -222,7 +234,7 @@
                                 <div class="mt-4 space-y-4">
                                     <input type="hidden" id="asset-id">
                                     
-                                    <!-- Asset Number with Dropdown -->
+                                    <!-- Updated Asset Number with Dropdown -->
                                     <div>
                                         <label for="asset-prefix-select" class="block text-sm font-medium text-gray-700 required-label">Asset Number</label>
                                         <div class="mt-1 flex rounded-md shadow-sm">
@@ -237,7 +249,6 @@
                                     </div>
 
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <!-- Category Field -->
                                         <div>
                                             <label for="asset-category" class="block text-sm font-medium text-gray-700 required-label">Category</label>
                                             <select id="asset-category" class="mt-1 form-select w-full border border-gray-300 rounded-md shadow-sm" required>
@@ -255,7 +266,6 @@
                                         </div>
                                     </div>
                                     
-                                    <!-- Status Field -->
                                     <div>
                                         <label for="asset-status" class="block text-sm font-medium text-gray-700 required-label">Status</label>
                                         <select id="asset-status" class="mt-1 form-select w-full border border-gray-300 rounded-md shadow-sm" required>
@@ -264,7 +274,6 @@
                                         </select>
                                     </div>
 
-                                    <!-- Employee Fields (Conditional) -->
                                     <div id="issued-to-fields" class="hidden space-y-4 p-4 border border-gray-200 rounded-md">
                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
@@ -273,7 +282,7 @@
                                             </div>
                                             <div>
                                                 <label for="employee-code" class="block text-sm font-medium text-gray-700 required-label">Employee Code</label>
-                                                <!-- Numeric Validation Added -->
+                                                <!-- Added numeric validation -->
                                                 <input type="tel" id="employee-code" inputmode="numeric" pattern="[0-9]*" title="Please enter only numbers." class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm">
                                             </div>
                                         </div>
@@ -392,19 +401,21 @@
     <script>
         // --- API & STATE ---
         
-        // This is the CRITICAL change.
-        // It now points to your *live* Render backend server.
-        const API_URL = 'https://asset-app-backend.onrender.com';
+        // =========================================================================
+        // ==  CRITICAL: This URL MUST match your Render backend URL             ==
+        // =========================================================================
+        const API_URL = 'https://asset-app-backend-2tgc.onrender.com';
         
         const CATEGORIES = ['Laptop', 'Desktop', 'Printer', 'Data Card', 'Other'];
 
+        // 'db' is removed. 'state' now holds all live data.
         let state = {
-            currentUser: null,
-            assets: [],
-            users: [],
-            editingAssetId: null,
-            editingUserId: null,
-            assetFilter: '',
+            currentUser: null, // Holds the logged-in user object
+            assets: [], // Will be filled from the database
+            users: [], // Will be filled from the database
+            editingAssetId: null, // Tracks which asset is being edited
+            editingUserId: null,  // Tracks which user is being edited
+            assetFilter: '', // For search
         };
 
         // --- DOM ELEMENT SELECTORS ---
@@ -462,6 +473,7 @@
          * Initialize the application on page load.
          */
         function init() {
+            // Just attach listeners. UI is rendered based on login state.
             loginForm.addEventListener('submit', handleLogin);
             logoutBtn.addEventListener('click', handleLogout);
             
@@ -472,12 +484,12 @@
             exportBtn.addEventListener('click', exportToCSV);
             searchInput.addEventListener('input', (e) => {
                 state.assetFilter = e.target.value.toLowerCase();
-                renderAssetTable();
+                renderAssetTable(); // This now filters the data in 'state'
             });
             assetStatus.addEventListener('change', (e) => toggleIssuedFields(e.target.value));
             assetPrefixSelect.addEventListener('change', (e) => togglePrefixOther(e.target.value));
             
-            // Employee code numeric only listener
+            // Employee code numeric input validation
             employeeCode.addEventListener('input', (e) => {
                 e.target.value = e.target.value.replace(/[^0-9]/g, '');
             });
@@ -499,7 +511,7 @@
                 }
                 if (deleteBtn) {
                     const id = parseInt(deleteBtn.dataset.id);
-                    handleDeleteAsset(id);
+                    handleDeleteAsset(id); // Now calls API
                 }
             });
             
@@ -513,7 +525,7 @@
                 }
                 if (deleteBtn) {
                     const id = parseInt(deleteBtn.dataset.id);
-                    handleDeleteUser(id);
+                    handleDeleteUser(id); // Now calls API
                 }
             });
         }
@@ -529,11 +541,13 @@
                 mainView.classList.add('flex', 'flex-col');
                 welcomeUser.textContent = `Welcome, ${state.currentUser.username}!`;
                 
+                // Show admin buttons if user is admin
                 if (state.currentUser.role === 'admin') {
                     document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
                 } else {
                     document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
                 }
+                // Render data that was loaded into state
                 renderDashboardStats();
                 renderAssetTable();
             } else {
@@ -606,7 +620,7 @@
             const password = $('#password').value;
             
             try {
-                // Now fetching from the live Render API_URL
+                // We use API_URL here, which points to our Render server
                 const response = await fetch(`${API_URL}/api/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -616,15 +630,23 @@
                 if (response.ok) {
                     const user = await response.json();
                     state.currentUser = user;
-                    await loadInitialData(); 
-                    renderUI(); 
+                    await loadInitialData(); // Load all data from DB
+                    renderUI(); // Show the main app
                     showToast(`Welcome back, ${user.username}!`);
                 } else {
-                    const err = await response.json();
-                    loginError.textContent = err.error || 'Invalid username or password.';
+                    // Try to get a specific error message from the server
+                    let err = 'Invalid username or password.';
+                    try {
+                        const errData = await response.json();
+                        err = errData.error || err;
+                    } catch (jsonErr) {
+                        // Server returned non-JSON error
+                    }
+                    loginError.textContent = err;
                     loginError.classList.remove('hidden');
                 }
             } catch (err) {
+                // This catch block handles network errors (e.g., server is down, CORS fails)
                 console.error('Login fetch error:', err);
                 loginError.textContent = 'Cannot connect to server. Is it running?';
                 loginError.classList.remove('hidden');
@@ -639,6 +661,7 @@
         async function loadInitialData() {
             setMainLoading(true);
             try {
+                // Fetch assets and users in parallel
                 const [assetsRes, usersRes] = await Promise.all([
                     fetch(`${API_URL}/api/assets`),
                     state.currentUser.role === 'admin' ? fetch(`${API_URL}/api/users`) : Promise.resolve(null)
@@ -651,9 +674,10 @@
                 if (usersRes && usersRes.ok) {
                     state.users = await usersRes.json();
                 } else {
-                    state.users = [];
+                    state.users = []; // Not an admin or error
                 }
                 
+                // Sort data (since we removed orderBy from backend)
                 state.assets.sort((a, b) => a.id - b.id);
                 state.users.sort((a, b) => a.id - b.id);
 
@@ -683,11 +707,11 @@
          * Renders the asset overview statistics from 'state.assets'.
          */
         function renderDashboardStats() {
-            dashboardStats.innerHTML = ''; 
+            dashboardStats.innerHTML = ''; // Clear stats
             
             let totalStock = 0;
             let totalIssued = 0;
-            const assets = state.assets; 
+            const assets = state.assets; // Use data from state
 
             CATEGORIES.forEach(category => {
                 const stock = assets.filter(a => a.category === category && a.status === 'In Stock').length;
@@ -730,7 +754,7 @@
         function renderAssetTable() {
             assetTableBody.innerHTML = '';
             
-            // SYNTAX ERROR FIX: Removed extra '.' from state.assets..filter
+            // Fixed typo: was state.assets..filter
             const filteredAssets = state.assets.filter(asset => {
                 const fullAssetNumber = `${asset.assetprefix || ''}${asset.assetnumber}`.toLowerCase();
                 const assetName = (asset.assetname || '').toLowerCase();
@@ -760,6 +784,7 @@
                 
                 const displayDate = asset.date ? asset.date.split('T')[0] : 'N/A';
 
+                // Fixed typo: was classS=
                 tr.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${asset.assetprefix}${asset.assetnumber}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.category}</td>
@@ -774,13 +799,12 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.cugmobile || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.department || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.designation || ''}</td>
-                    <!-- SYNTAX ERROR FIX: Changed classS= to class= -->
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${displayDate}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                         <button class="edit-asset-btn text-blue-600 hover:text-blue-900" data-id="${asset.id}">
                             <i class="fas fa-edit"></i>
                         </button>
-                        ${state.currentUser.username === 'admin' ? 
+                        ${state.currentUser.username === 'admin' ? // Only main admin can delete
                         `<button class="delete-asset-btn text-red-600 hover:text-red-900" data-id="${asset.id}">
                             <i class="fas fa-trash"></i>
                         </button>` : ''}
@@ -898,8 +922,8 @@
                 
                 showToast(isEditing ? 'Asset updated successfully!' : 'Asset added successfully!');
                 hideAssetModal();
-                await loadInitialData(); 
-                renderUI(); 
+                await loadInitialData(); // Reload all data from DB
+                renderUI(); // Re-render everything with new data
                 
             } catch (err) {
                 console.error('Save asset error:', err);
@@ -951,11 +975,6 @@
                 showToast('You do not have permission to delete assets.', true);
                 return;
             }
-            
-            // NOTE: Replace this with a custom modal confirmation in a real app
-            // if (!confirm('Are you sure you want to delete this asset?')) {
-            //     return;
-            // }
 
             try {
                 const response = await fetch(`${API_URL}/api/assets/${id}`, {
@@ -968,8 +987,8 @@
                 }
 
                 showToast('Asset deleted.', true);
-                await loadInitialData(); 
-                renderUI(); 
+                await loadInitialData(); // Reload all data
+                renderUI(); // Re-render
 
             } catch (err) {
                 console.error('Delete asset error:', err);
@@ -1061,7 +1080,7 @@
          */
         function showUserModal() {
             if (state.currentUser.role !== 'admin') return;
-            renderUserList(); 
+            renderUserList(); // Already have users in state
             resetUserForm();
             userModal.classList.remove('hidden');
         }
@@ -1107,7 +1126,7 @@
             if (isEditing) {
                 url = `${API_URL}/api/users/${state.editingUserId}`;
                 method = 'PUT';
-                body = { password, role }; 
+                body = { password, role }; // Only send password and role
             }
             
             try {
@@ -1124,6 +1143,7 @@
 
                 showToast(isEditing ? 'User updated successfully!' : 'User created successfully!');
                 
+                // Reload user data and re-render
                 const usersRes = await fetch(`${API_URL}/api/users`);
                 state.users = await usersRes.json();
                 state.users.sort((a, b) => a.id - b.id);
@@ -1144,31 +1164,38 @@
             const user = state.users.find(u => u.id === id);
             if (!user) return;
             
+            if (user.username === 'admin') {
+                showToast('The main "admin" user cannot be edited from this panel.', true);
+                return;
+            }
+
             state.editingUserId = id;
             userFormTitle.textContent = 'Edit User';
             $('#user-id').value = user.id;
             $('#user-username').value = user.username;
-            $('#user-username').disabled = true; // Don't allow changing username
+            $('#user-username').disabled = true; // Don't allow username change
             $('#user-role').value = user.role;
-            $('#user-password').placeholder = 'Leave blank to keep same password';
+            $('#user-password').placeholder = 'Set new password';
             $('#user-password').required = false; // Not required when editing
+            
             cancelUserEditBtn.classList.remove('hidden');
         }
         
         /**
-         * Deletes a user by
+         * Deletes a user by ID.
          */
         async function handleDeleteUser(id) {
             const user = state.users.find(u => u.id === id);
             if (!user || user.username === 'admin') {
-                showToast('Cannot delete this user.', true);
+                showToast('The main "admin" user cannot be deleted.', true);
                 return;
             }
             
-            // if (!confirm(`Are you sure you want to delete user ${user.username}?`)) {
-            //     return;
-            // }
-            
+            if (user.id === state.currentUser.id) {
+                showToast('You cannot delete yourself.', true);
+                return;
+            }
+
             try {
                 const response = await fetch(`${API_URL}/api/users/${id}`, {
                     method: 'DELETE'
@@ -1178,24 +1205,25 @@
                     const err = await response.json();
                     throw new Error(err.error || 'Failed to delete user');
                 }
-                
-                showToast('User deleted.', true);
-                
+
+                showToast('User deleted successfully.', true);
+                // Reload user data
                 const usersRes = await fetch(`${API_URL}/api/users`);
                 state.users = await usersRes.json();
                 state.users.sort((a, b) => a.id - b.id);
-                
                 renderUserList();
-                resetUserForm();
-
+                
             } catch (err) {
                 console.error('Delete user error:', err);
                 showToast(`Error: ${err.message}`, true);
             }
         }
-
+        
         // --- STARTUP ---
-        init(); // Start the application
+        // Initialize the app when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', init);
+
     </script>
 </body>
 </html>
+
