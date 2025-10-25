@@ -18,57 +18,30 @@
         }
     </script>
     <style>
-        /* Simple scrollbar styling */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 6px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        /* Style for required fields */
-        .required-label::after {
-            content: '*';
-            color: red;
-            margin-left: 2px;
-        }
-        /* Styling for dashboard cards */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        .required-label::after { content: '*'; color: red; margin-left: 2px; }
         .stat-card {
-            background-color: #f9fafb; /* bg-gray-50 */
-            border: 1px solid #e5e7eb; /* border-gray-200 */
-            border-radius: 0.75rem; /* rounded-xl */
-            padding: 1rem;
-            text-align: center;
+            background-color: #f9fafb; border: 1px solid #e5e7eb;
+            border-radius: 0.75rem; padding: 1rem; text-align: center;
             transition: all 0.2s ease-in-out;
         }
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        /* Basic spinner for loading state */
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: #4f46e5;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            border-left-color: #4f46e5; border-radius: 50%;
+            width: 40px; height: 40px;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
 
     <!-- Main Application Container -->
-    <div id="app" class="flex flex-col h-screen">
+    <div id="app" class="flex flex-col min-h-screen">
 
         <!-- Login View -->
         <div id="login-view" class="flex-grow flex items-center justify-center p-6">
@@ -79,7 +52,6 @@
                     <p class="text-gray-500">Please sign in to continue</p>
                 </div>
                 
-                <!-- Login Form -->
                 <form id="login-form" class="space-y-6">
                     <div>
                         <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
@@ -101,7 +73,6 @@
                         </div>
                     </div>
                     
-                    <!-- Login Error Message -->
                     <div id="login-error" class="text-red-500 text-sm hidden"></div>
 
                     <button type="submit" id="login-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-0.5 flex items-center justify-center">
@@ -119,13 +90,10 @@
             <header class="bg-white shadow-md">
                 <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center h-16">
-                        <!-- Logo/Title -->
                         <div class="flex items-center">
                             <i class="fas fa-tasks text-3xl text-blue-600"></i>
                             <span class="text-xl font-bold text-gray-800 ml-3">Best Cement IT Asset Portal</span>
                         </div>
-                        
-                        <!-- Nav Links & Logout -->
                         <div class="flex items-center space-x-4">
                             <span id="welcome-user" class="text-gray-600 hidden sm:block"></span>
                             <button id="user-manage-btn" class="admin-only hidden items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 shadow-sm">
@@ -142,14 +110,11 @@
             <!-- Main Content Area -->
             <main id="main-content" class="flex-grow container mx-auto p-4 sm:p-6 lg:p-8 overflow-y-auto">
                 
-                <!-- Loading Spinner -->
                 <div id="main-loading" class="hidden justify-center items-center py-20">
                     <div class="spinner"></div>
                 </div>
 
-                <!-- Content Wrapper (hidden while loading) -->
-                <div id="content-wrapper">
-                    <!-- New Dashboard Stats Section -->
+                <div id="content-wrapper" class="hidden">
                     <div class="mb-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-4">Asset Overview</h2>
                         <div id="dashboard-stats" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -157,9 +122,7 @@
                         </div>
                     </div>
 
-                    <!-- Asset Table Section -->
                     <div class="bg-white p-6 rounded-xl shadow-lg">
-                        <!-- Action Header -->
                         <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                             <h2 class="text-2xl font-bold text-gray-800">Asset Dashboard</h2>
                             <div class="flex items-center space-x-3">
@@ -172,24 +135,27 @@
                             </div>
                         </div>
                         
-                        <!-- Search Bar -->
                         <div class="mb-4">
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i class="fas fa-search text-gray-400"></i>
                                 </div>
-                                <input type="text" id="search-input" class="form-input w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Search by name, asset number, employee, or department...">
+                                <input type="text" id="search-input" class="form-input w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Search by name, asset no, serial no, make, employee...">
                             </div>
                         </div>
 
-                        <!-- Asset Table -->
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
+                                        <!-- Updated/New Columns -->
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset No.</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset Name</th>
+                                        <!-- NEW -->
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Make/Model</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serial No.</th>
+                                        <!-- END NEW -->
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee Name</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee Code</th>
@@ -212,15 +178,18 @@
                     </div>
                 </div>
             </main>
+            
+            <!-- NEW Footer -->
+            <footer class="text-center py-4 text-sm text-gray-500 bg-gray-200">
+                This webapp is developed by IT Dept, Best Cement
+            </footer>
         </div>
     </div>
 
     <!-- Asset Modal (Add/Edit) -->
     <div id="asset-modal" class="hidden fixed z-10 inset-0 overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <!-- Background overlay -->
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-            <!-- Modal panel -->
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                 <form id="asset-form">
@@ -234,7 +203,6 @@
                                 <div class="mt-4 space-y-4">
                                     <input type="hidden" id="asset-id">
                                     
-                                    <!-- Updated Asset Number with Dropdown -->
                                     <div>
                                         <label for="asset-prefix-select" class="block text-sm font-medium text-gray-700 required-label">Asset Number</label>
                                         <div class="mt-1 flex rounded-md shadow-sm">
@@ -266,6 +234,19 @@
                                         </div>
                                     </div>
                                     
+                                    <!-- NEW FIELDS -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="asset-make" class="block text-sm font-medium text-gray-700">Make/Model</label>
+                                            <input type="text" id="asset-make" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm" placeholder="e.g., Dell / Latitude 7490">
+                                        </div>
+                                        <div>
+                                            <label for="asset-serial" class="block text-sm font-medium text-gray-700">Serial No.</label>
+                                            <input type="text" id="asset-serial" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm" placeholder="e.g., ABC123XYZ">
+                                        </div>
+                                    </div>
+                                    <!-- END NEW FIELDS -->
+
                                     <div>
                                         <label for="asset-status" class="block text-sm font-medium text-gray-700 required-label">Status</label>
                                         <select id="asset-status" class="mt-1 form-select w-full border border-gray-300 rounded-md shadow-sm" required>
@@ -282,8 +263,7 @@
                                             </div>
                                             <div>
                                                 <label for="employee-code" class="block text-sm font-medium text-gray-700 required-label">Employee Code</label>
-                                                <!-- Added numeric validation -->
-                                                <input type="tel" id="employee-code" inputmode="numeric" pattern="[0-9]*" title="Please enter only numbers." class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm">
+                                                <input type="tel" id="employee-code" pattern="[0-9]*" title="Please enter only numbers." class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm">
                                             </div>
                                         </div>
                                     </div>
@@ -327,9 +307,7 @@
     <!-- User Management Modal (Admin Only) -->
     <div id="user-modal" class="hidden fixed z-20 inset-0 overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <!-- Overlay -->
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-            <!-- Panel -->
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -341,7 +319,6 @@
                             <h3 class="text-lg leading-6 font-medium text-gray-900">User Management</h3>
                             <div class="mt-4 flex flex-col md:flex-row gap-6">
                                 
-                                <!-- Add/Edit User Form -->
                                 <div class="w-full md:w-1/2">
                                     <h4 class="font-semibold text-gray-700" id="user-form-title">Add New User</h4>
                                     <form id="user-form" class="space-y-4 mt-2">
@@ -372,7 +349,6 @@
                                     </form>
                                 </div>
                                 
-                                <!-- User List -->
                                 <div class="w-full md:w-1/2">
                                     <h4 class="font-semibold text-gray-700">Existing Users</h4>
                                     <div id="user-list-container" class="mt-2 space-y-2 max-h-60 overflow-y-auto pr-2">
@@ -401,21 +377,18 @@
     <script>
         // --- API & STATE ---
         
-        // =========================================================================
-        // ==  CRITICAL: This URL MUST match your Render backend URL             ==
-        // =========================================================================
+        // This is the correct, final URL for your Render backend
         const API_URL = 'https://asset-app-backend-2tgc.onrender.com';
         
         const CATEGORIES = ['Laptop', 'Desktop', 'Printer', 'Data Card', 'Other'];
 
-        // 'db' is removed. 'state' now holds all live data.
         let state = {
-            currentUser: null, // Holds the logged-in user object
-            assets: [], // Will be filled from the database
-            users: [], // Will be filled from the database
-            editingAssetId: null, // Tracks which asset is being edited
-            editingUserId: null,  // Tracks which user is being edited
-            assetFilter: '', // For search
+            currentUser: null,
+            assets: [],
+            users: [],
+            editingAssetId: null,
+            editingUserId: null,
+            assetFilter: '',
         };
 
         // --- DOM ELEMENT SELECTORS ---
@@ -463,7 +436,6 @@
         const userFormTitle = $('#user-form-title');
         const cancelUserEditBtn = $('#cancel-user-edit-btn');
         
-        // Toast/Alert
         const toast = $('#toast');
         const toastMessage = $('#toast-message');
 
@@ -473,7 +445,9 @@
          * Initialize the application on page load.
          */
         function init() {
-            // Just attach listeners. UI is rendered based on login state.
+            // NEW: Check for a logged-in user in localStorage first
+            checkPersistedLogin();
+            
             loginForm.addEventListener('submit', handleLogin);
             logoutBtn.addEventListener('click', handleLogout);
             
@@ -484,13 +458,13 @@
             exportBtn.addEventListener('click', exportToCSV);
             searchInput.addEventListener('input', (e) => {
                 state.assetFilter = e.target.value.toLowerCase();
-                renderAssetTable(); // This now filters the data in 'state'
+                renderAssetTable();
             });
             assetStatus.addEventListener('change', (e) => toggleIssuedFields(e.target.value));
             assetPrefixSelect.addEventListener('change', (e) => togglePrefixOther(e.target.value));
             
-            // Employee code numeric input validation
-            employeeCode.addEventListener('input', (e) => {
+            // Numeric input validation for employee code
+            $('#employee-code').addEventListener('input', (e) => {
                 e.target.value = e.target.value.replace(/[^0-9]/g, '');
             });
 
@@ -511,7 +485,7 @@
                 }
                 if (deleteBtn) {
                     const id = parseInt(deleteBtn.dataset.id);
-                    handleDeleteAsset(id); // Now calls API
+                    handleDeleteAsset(id);
                 }
             });
             
@@ -525,7 +499,7 @@
                 }
                 if (deleteBtn) {
                     const id = parseInt(deleteBtn.dataset.id);
-                    handleDeleteUser(id); // Now calls API
+                    handleDeleteUser(id);
                 }
             });
         }
@@ -541,7 +515,6 @@
                 mainView.classList.add('flex', 'flex-col');
                 welcomeUser.textContent = `Welcome, ${state.currentUser.username}!`;
                 
-                // Show admin buttons if user is admin
                 if (state.currentUser.role === 'admin') {
                     document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
                 } else {
@@ -561,37 +534,19 @@
             }
         }
         
-        /**
-         * Shows a success or error toast message.
-         */
         function showToast(message, isError = false) {
             toastMessage.textContent = message;
             toast.classList.remove('hidden', 'bg-green-500', 'bg-red-500');
-            
-            if (isError) {
-                toast.classList.add('bg-red-500');
-            } else {
-                toast.classList.add('bg-green-500');
-            }
-            
+            toast.classList.add(isError ? 'bg-red-500' : 'bg-green-500');
             setTimeout(() => {
                 toast.classList.add('hidden');
             }, 3000);
         }
 
-        /**
-         * Helper to show/hide loading states
-         */
         function setLoginLoading(isLoading) {
-            if (isLoading) {
-                loginButton.disabled = true;
-                loginButtonText.textContent = 'Signing In...';
-                loginButton.classList.add('opacity-75');
-            } else {
-                loginButton.disabled = false;
-                loginButtonText.textContent = 'Sign In';
-                loginButton.classList.remove('opacity-75');
-            }
+            loginButton.disabled = isLoading;
+            loginButtonText.textContent = isLoading ? 'Signing In...' : 'Sign In';
+            loginButton.classList.toggle('opacity-75', isLoading);
         }
 
         function setMainLoading(isLoading) {
@@ -609,6 +564,31 @@
         // --- AUTHENTICATION & DATA LOADING ---
 
         /**
+         * NEW: Check localStorage for a saved user session.
+         */
+        async function checkPersistedLogin() {
+            const persistedUser = localStorage.getItem('currentUser');
+            if (persistedUser) {
+                try {
+                    state.currentUser = JSON.parse(persistedUser);
+                    setMainLoading(true); // Show spinner while loading data
+                    await loadInitialData(); // Load all data from DB
+                    renderUI(); // Show the main app
+                    setMainLoading(false); // Hide spinner
+                    showToast(`Welcome back, ${state.currentUser.username}!`);
+                } catch (e) {
+                    // Invalid JSON, clear storage and show login
+                    localStorage.removeItem('currentUser');
+                    state.currentUser = null;
+                    renderUI();
+                }
+            } else {
+                // No saved user, just show the login page
+                renderUI();
+            }
+        }
+
+        /**
          * Handles the login form submission by calling the API.
          */
         async function handleLogin(e) {
@@ -620,7 +600,8 @@
             const password = $('#password').value;
             
             try {
-                // We use API_URL here, which points to our Render server
+                // This is the "wake up" call
+                // It might take 1-2 mins if the server is asleep
                 const response = await fetch(`${API_URL}/api/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -630,23 +611,18 @@
                 if (response.ok) {
                     const user = await response.json();
                     state.currentUser = user;
-                    await loadInitialData(); // Load all data from DB
-                    renderUI(); // Show the main app
-                    showToast(`Welcome back, ${user.username}!`);
+                    // NEW: Save user to localStorage
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    
+                    await loadInitialData(); 
+                    renderUI(); 
+                    showToast(`Welcome, ${user.username}!`);
                 } else {
-                    // Try to get a specific error message from the server
-                    let err = 'Invalid username or password.';
-                    try {
-                        const errData = await response.json();
-                        err = errData.error || err;
-                    } catch (jsonErr) {
-                        // Server returned non-JSON error
-                    }
-                    loginError.textContent = err;
+                    const err = await response.json();
+                    loginError.textContent = err.error || 'Invalid username or password.';
                     loginError.classList.remove('hidden');
                 }
             } catch (err) {
-                // This catch block handles network errors (e.g., server is down, CORS fails)
                 console.error('Login fetch error:', err);
                 loginError.textContent = 'Cannot connect to server. Is it running?';
                 loginError.classList.remove('hidden');
@@ -659,9 +635,7 @@
          * Loads all assets and users from the database into the 'state' object.
          */
         async function loadInitialData() {
-            setMainLoading(true);
             try {
-                // Fetch assets and users in parallel
                 const [assetsRes, usersRes] = await Promise.all([
                     fetch(`${API_URL}/api/assets`),
                     state.currentUser.role === 'admin' ? fetch(`${API_URL}/api/users`) : Promise.resolve(null)
@@ -674,18 +648,17 @@
                 if (usersRes && usersRes.ok) {
                     state.users = await usersRes.json();
                 } else {
-                    state.users = []; // Not an admin or error
+                    state.users = [];
                 }
                 
-                // Sort data (since we removed orderBy from backend)
                 state.assets.sort((a, b) => a.id - b.id);
                 state.users.sort((a, b) => a.id - b.id);
 
             } catch (err) {
                 console.error('Data loading error:', err);
                 showToast('Error loading data from database.', true);
-            } finally {
-                setMainLoading(false);
+                // If data fails to load, log out
+                handleLogout();
             }
         }
 
@@ -697,21 +670,20 @@
             state.currentUser = null;
             state.assets = [];
             state.users = [];
+            // NEW: Remove user from localStorage
+            localStorage.removeItem('currentUser');
             renderUI();
             showToast(`User ${username} logged out.`);
         }
         
         // --- DASHBOARD FUNCTION ---
 
-        /**
-         * Renders the asset overview statistics from 'state.assets'.
-         */
         function renderDashboardStats() {
-            dashboardStats.innerHTML = ''; // Clear stats
+            dashboardStats.innerHTML = '';
             
             let totalStock = 0;
             let totalIssued = 0;
-            const assets = state.assets; // Use data from state
+            const assets = state.assets; 
 
             CATEGORIES.forEach(category => {
                 const stock = assets.filter(a => a.category === category && a.status === 'In Stock').length;
@@ -748,16 +720,15 @@
 
         // --- ASSET MANAGEMENT FUNCTIONS ---
 
-        /**
-         * Renders the list of assets from 'state.assets' into the table.
-         */
         function renderAssetTable() {
             assetTableBody.innerHTML = '';
             
-            // Fixed typo: was state.assets..filter
             const filteredAssets = state.assets.filter(asset => {
                 const fullAssetNumber = `${asset.assetprefix || ''}${asset.assetnumber}`.toLowerCase();
                 const assetName = (asset.assetname || '').toLowerCase();
+                // NEW fields for search
+                const assetMake = (asset.assetmake || '').toLowerCase();
+                const assetSerial = (asset.assetserial || '').toLowerCase();
                 const department = (asset.department || '').toLowerCase();
                 const employeeName = (asset.employeename || '').toLowerCase();
                 const employeeCode = (asset.employeecode || '').toLowerCase();
@@ -765,6 +736,9 @@
                 return (
                     assetName.includes(state.assetFilter) ||
                     fullAssetNumber.includes(state.assetFilter) ||
+                    // NEW fields for search
+                    assetMake.includes(state.assetFilter) ||
+                    assetSerial.includes(state.assetFilter) ||
                     department.includes(state.assetFilter) ||
                     employeeName.includes(state.assetFilter) ||
                     employeeCode.includes(state.assetFilter)
@@ -784,11 +758,14 @@
                 
                 const displayDate = asset.date ? asset.date.split('T')[0] : 'N/A';
 
-                // Fixed typo: was classS=
                 tr.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${asset.assetprefix}${asset.assetnumber}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.category}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${asset.assetname}</td>
+                    <!-- NEW -->
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.assetmake || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.assetserial || ''}</td>
+                    <!-- END NEW -->
                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${asset.status === 'Issued' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">
                             ${asset.status}
@@ -804,7 +781,7 @@
                         <button class="edit-asset-btn text-blue-600 hover:text-blue-900" data-id="${asset.id}">
                             <i class="fas fa-edit"></i>
                         </button>
-                        ${state.currentUser.username === 'admin' ? // Only main admin can delete
+                        ${state.currentUser.username === 'admin' ? 
                         `<button class="delete-asset-btn text-red-600 hover:text-red-900" data-id="${asset.id}">
                             <i class="fas fa-trash"></i>
                         </button>` : ''}
@@ -814,9 +791,6 @@
             });
         }
 
-        /**
-         * Toggles the visibility of Employee Name/Code fields based on status.
-         */
         function toggleIssuedFields(status) {
             if (status === 'Issued') {
                 issuedToFields.classList.remove('hidden');
@@ -831,9 +805,6 @@
             }
         }
         
-        /**
-         * Toggles the visibility of the 'Other' prefix input field.
-         */
         function togglePrefixOther(value) {
             if (value === 'other') {
                 assetPrefixOther.classList.remove('hidden');
@@ -845,18 +816,12 @@
             }
         }
 
-        /**
-         * Shows the modal for adding or editing an asset.
-         */
         function showAssetModal() {
             assetModal.classList.remove('hidden');
             toggleIssuedFields(assetStatus.value);
             togglePrefixOther(assetPrefixSelect.value);
         }
 
-        /**
-         * Hides and resets the asset modal.
-         */
         function hideAssetModal() {
             assetModal.classList.add('hidden');
             assetForm.reset();
@@ -866,9 +831,6 @@
             togglePrefixOther('JUD/IT ASSET/');
         }
 
-        /**
-         * Handles submission of the add/edit asset form to the API.
-         */
         async function handleAssetFormSubmit(e) {
             e.preventDefault();
             
@@ -895,6 +857,10 @@
                 assetNumber: $('#asset-number-input').value,
                 assetName: $('#asset-name').value,
                 category: $('#asset-category').value,
+                // NEW
+                assetMake: $('#asset-make').value,
+                assetSerial: $('#asset-serial').value,
+                // END NEW
                 status: status,
                 employeeName: status === 'Issued' ? empName : '',
                 employeeCode: status === 'Issued' ? empCode : '',
@@ -920,10 +886,23 @@
                     throw new Error(err.error || 'Failed to save asset');
                 }
                 
+                const savedAsset = await response.json();
+                
+                if (isEditing) {
+                    // Find and update the asset in the local state
+                    const index = state.assets.findIndex(a => a.id === state.editingAssetId);
+                    if (index !== -1) {
+                        state.assets[index] = savedAsset;
+                    }
+                } else {
+                    // Add the new asset to the local state
+                    state.assets.push(savedAsset);
+                }
+                state.assets.sort((a, b) => a.id - b.id);
+                
                 showToast(isEditing ? 'Asset updated successfully!' : 'Asset added successfully!');
                 hideAssetModal();
-                await loadInitialData(); // Reload all data from DB
-                renderUI(); // Re-render everything with new data
+                renderUI(); // Re-render everything with new local state
                 
             } catch (err) {
                 console.error('Save asset error:', err);
@@ -931,9 +910,6 @@
             }
         }
 
-        /**
-         * Pre-fills the asset modal for editing.
-         */
         function handleEditAsset(id) {
             const asset = state.assets.find(a => a.id === id);
             if (!asset) return;
@@ -945,6 +921,10 @@
             assetNumberInput.value = asset.assetnumber;
             $('#asset-name').value = asset.assetname;
             $('#asset-category').value = asset.category;
+            // NEW
+            $('#asset-make').value = asset.assetmake;
+            $('#asset-serial').value = asset.assetserial;
+            // END NEW
             assetStatus.value = asset.status;
             employeeName.value = asset.employeename;
             employeeCode.value = asset.employeecode;
@@ -967,14 +947,16 @@
             showAssetModal();
         }
 
-        /**
-         * Deletes an asset by
-         */
         async function handleDeleteAsset(id) {
             if (state.currentUser.username !== 'admin') {
                 showToast('You do not have permission to delete assets.', true);
                 return;
             }
+            
+            // TODO: Replace this with a custom modal confirmation in a real app
+            // if (!confirm('Are you sure you want to delete this asset?')) {
+            //     return;
+            // }
 
             try {
                 const response = await fetch(`${API_URL}/api/assets/${id}`, {
@@ -986,8 +968,9 @@
                     throw new Error(err.error || 'Failed to delete asset');
                 }
 
+                // Remove from local state
+                state.assets = state.assets.filter(a => a.id !== id);
                 showToast('Asset deleted.', true);
-                await loadInitialData(); // Reload all data
                 renderUI(); // Re-render
 
             } catch (err) {
@@ -996,22 +979,23 @@
             }
         }
 
-        /**
-         * Exports the current asset list (from state) to a CSV file.
-         */
         function exportToCSV() {
             if (state.assets.length === 0) {
                 showToast('No assets to export.', true);
                 return;
             }
 
-            const headers = ['AssetNumber', 'Category', 'AssetName', 'Status', 'EmployeeName', 'EmployeeCode', 'CUGMobile', 'Department', 'Designation', 'Date'];
+            // NEW: Added new headers
+            const headers = ['AssetNumber', 'Category', 'AssetName', 'MakeModel', 'SerialNo', 'Status', 'EmployeeName', 'EmployeeCode', 'CUGMobile', 'Department', 'Designation', 'Date'];
             
             const rows = state.assets.map(asset => 
                 [
                     `"${asset.assetprefix}${asset.assetnumber}"`, 
                     `"${asset.category}"`,
                     `"${asset.assetname}"`,
+                    // NEW: Added new data fields
+                    `"${asset.assetmake || ''}"`,
+                    `"${asset.assetserial || ''}"`,
                     `"${asset.status}"`,
                     `"${asset.employeename || ''}"`,
                     `"${asset.employeecode || ''}"`,
@@ -1039,9 +1023,6 @@
 
         // --- USER MANAGEMENT FUNCTIONS (ADMIN) ---
 
-        /**
-         * Renders the list of users from 'state.users'.
-         */
         function renderUserList() {
             userListContainer.innerHTML = '';
             
@@ -1075,26 +1056,17 @@
             });
         }
         
-        /**
-         * Shows the user management modal.
-         */
         function showUserModal() {
             if (state.currentUser.role !== 'admin') return;
-            renderUserList(); // Already have users in state
+            renderUserList();
             resetUserForm();
             userModal.classList.remove('hidden');
         }
 
-        /**
-         * Hides the user management modal.
-         */
         function hideUserModal() {
             userModal.classList.add('hidden');
         }
         
-        /**
-         * Resets the user form to its "Add User" state.
-         */
         function resetUserForm() {
             userForm.reset();
             state.editingUserId = null;
@@ -1103,9 +1075,6 @@
             $('#user-username').disabled = false;
         }
         
-        /**
-         * Handles submission of the add/edit user form to the API.
-         */
         async function handleUserFormSubmit(e) {
             e.preventDefault();
             
@@ -1113,11 +1082,11 @@
             const password = $('#user-password').value;
             const role = $('#user-role').value;
             
-            if (!username || !password || !role) {
-                showToast('All fields are required.', true);
+            if (!username || !role) {
+                showToast('Username and Role are required.', true);
                 return;
             }
-
+            
             const isEditing = !!state.editingUserId;
             let url = `${API_URL}/api/users`;
             let method = 'POST';
@@ -1126,7 +1095,15 @@
             if (isEditing) {
                 url = `${API_URL}/api/users/${state.editingUserId}`;
                 method = 'PUT';
-                body = { password, role }; // Only send password and role
+                body = { password, role }; 
+                if (!password) {
+                    // Don't send an empty password on update
+                    delete body.password;
+                }
+            } else if (!password) {
+                // Password is required for new users
+                showToast('Password is required for new users.', true);
+                return;
             }
             
             try {
@@ -1140,14 +1117,20 @@
                     const err = await response.json();
                     throw new Error(err.error || 'Failed to save user');
                 }
-
-                showToast(isEditing ? 'User updated successfully!' : 'User created successfully!');
                 
-                // Reload user data and re-render
-                const usersRes = await fetch(`${API_URL}/api/users`);
-                state.users = await usersRes.json();
+                const savedUser = await response.json();
+
+                if (isEditing) {
+                    const index = state.users.findIndex(u => u.id === state.editingUserId);
+                    if (index !== -1) {
+                        state.users[index] = { ...state.users[index], ...savedUser };
+                    }
+                } else {
+                    state.users.push(savedUser);
+                }
                 state.users.sort((a, b) => a.id - b.id);
                 
+                showToast(isEditing ? 'User updated successfully!' : 'User created successfully!');
                 renderUserList();
                 resetUserForm();
 
@@ -1157,44 +1140,28 @@
             }
         }
         
-        /**
-         * Pre-fills the user form for editing.
-         */
         function handleEditUser(id) {
             const user = state.users.find(u => u.id === id);
             if (!user) return;
-            
-            if (user.username === 'admin') {
-                showToast('The main "admin" user cannot be edited from this panel.', true);
-                return;
-            }
 
             state.editingUserId = id;
             userFormTitle.textContent = 'Edit User';
             $('#user-id').value = user.id;
             $('#user-username').value = user.username;
-            $('#user-username').disabled = true; // Don't allow username change
+            $('#user-username').disabled = true; // Don't allow changing username
+            $('#user-password').value = '';
+            $('#user-password').placeholder = 'Set new password (optional)';
+            $('#user-password').required = false;
             $('#user-role').value = user.role;
-            $('#user-password').placeholder = 'Set new password';
-            $('#user-password').required = false; // Not required when editing
             
             cancelUserEditBtn.classList.remove('hidden');
         }
         
-        /**
-         * Deletes a user by ID.
-         */
         async function handleDeleteUser(id) {
-            const user = state.users.find(u => u.id === id);
-            if (!user || user.username === 'admin') {
-                showToast('The main "admin" user cannot be deleted.', true);
-                return;
-            }
-            
-            if (user.id === state.currentUser.id) {
-                showToast('You cannot delete yourself.', true);
-                return;
-            }
+            // TODO: Add custom confirmation modal
+            // if (!confirm('Are you sure you want to delete this user?')) {
+            //     return;
+            // }
 
             try {
                 const response = await fetch(`${API_URL}/api/users/${id}`, {
@@ -1206,21 +1173,19 @@
                     throw new Error(err.error || 'Failed to delete user');
                 }
 
-                showToast('User deleted successfully.', true);
-                // Reload user data
-                const usersRes = await fetch(`${API_URL}/api/users`);
-                state.users = await usersRes.json();
-                state.users.sort((a, b) => a.id - b.id);
+                state.users = state.users.filter(u => u.id !== id);
+                showToast('User deleted.', true);
                 renderUserList();
-                
+                resetUserForm();
+
             } catch (err) {
                 console.error('Delete user error:', err);
                 showToast(`Error: ${err.message}`, true);
             }
         }
-        
-        // --- STARTUP ---
-        // Initialize the app when the DOM is fully loaded
+
+        // --- INITIALIZATION ---
+        // Run the init function once the DOM is fully loaded
         document.addEventListener('DOMContentLoaded', init);
 
     </script>
