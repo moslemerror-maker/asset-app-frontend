@@ -253,7 +253,7 @@
             signOut,
             signInAnonymously,
             signInWithCustomToken
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth..js";
         import { 
             getFirestore, 
             doc, 
@@ -265,30 +265,16 @@
             query, 
             addDoc,
             updateDoc,
-            getDocs
+            getDocs,
+            setLogLevel // Added for debugging
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // -------------------------------------------------------------------
         // Firebase Configuration
         // -------------------------------------------------------------------
-
-        // This app can run in two modes:
-        // 1. Canvas Environment: It uses injected __firebase_config and __initial_auth_token.
-        // 2. Public Environment (Netlify/GitHub): It uses the manual firebaseConfig placeholder and anonymous auth.
         
-        // --- THIS IS THE MANUAL CONFIG FOR PUBLIC DEPLOYMENT ---
-        // If __firebase_config is NOT provided by the environment,
-        // this placeholder will be used.
-        // PASTE YOUR FIREBASE CONFIG OBJECT HERE:
-        const firebaseConfigPlaceholder = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-        // --------------------------------------------------------
+        // This app is designed to run ONLY in the Canvas environment.
+        // It requires __firebase_config and __initial_auth_token to be injected.
 
         let app;
         let db;
@@ -297,25 +283,45 @@
         let firebaseConfig;
         let initialAuthToken;
 
+        // CRITICAL CHECK for environment variables
+        if (typeof __firebase_config === 'undefined' || !__firebase_config || 
+            typeof __initial_auth_token === 'undefined' || !__initial_auth_token) {
+            
+            // Environment variables are missing. This is a platform error.
+            // Show this error immediately and stop execution.
+            document.addEventListener('DOMContentLoaded', () => {
+                const appLoading = document.getElementById('app-loading');
+                const loadingText = document.getElementById('loading-text');
+                if (appLoading && loadingText) {
+                    const loadingSpinner = appLoading.querySelector('svg');
+                    if (loadingSpinner) loadingSpinner.style.display = 'none';
+                    loadingText.innerHTML = `Application Error: Required environment credentials are missing.<br>Please try refreshing the page.`;
+                    loadingText.classList.add('text-red-600', 'max-w-md', 'text-center', 'px-4');
+                } else {
+                    console.error("Fatal Error: app-loading elements not found.");
+                }
+            });
+            // Stop all further script execution
+            throw new Error("Missing required environment credentials (__firebase_config or __initial_auth_token).");
+        }
+
+
         try {
-            // Check if Canvas environment variables are present
-            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-                firebaseConfig = JSON.parse(__firebase_config);
-                initialAuthToken = (typeof __initial_auth_token !== 'undefined') ? __initial_auth_token : null;
-            } else {
-                // Fallback to manual placeholder for public deployment
-                firebaseConfig = firebaseConfigPlaceholder;
-                initialAuthToken = null; // Use anonymous auth
-            }
+            // At this point, we know the variables exist.
+            firebaseConfig = JSON.parse(__firebase_config);
+            initialAuthToken = __initial_auth_token;
 
             // Initialize Firebase
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
+            
+            // Enable Firestore debug logging
+            setLogLevel('debug');
 
             // Firestore Collection Paths
-            // Use projectId from the config, fallback to 'default-app-id'
-            appId = firebaseConfig.projectId || 'default-app-id'; 
+            // Use __app_id from the environment, fallback to 'default-app-id'
+            appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; 
             
             const ASSETS_COLLECTION = `/artifacts/${appId}/public/data/assets`;
             const USER_ROLES_COLLECTION = `/artifacts/${appId}/public/data/userRoles`;
@@ -352,6 +358,7 @@
             // --- Authentication ---
             onAuthStateChanged(auth, (user) => {
                 if (user) {
+                    console.log("Auth state changed, user is IN:", user.uid);
                     currentUserId = user.uid;
                     userEmailDisplay.textContent = user.email || (user.isAnonymous ? 'Anonymous User' : user.uid);
                     
@@ -367,6 +374,7 @@
                     appLoading.classList.add('hidden');
                     
                 } else {
+                    console.log("Auth state changed, user is OUT.");
                     // User is signed out
                     currentUserId = null;
                     currentUserRole = null;
@@ -386,10 +394,12 @@
             });
             
             async function checkAndAssignUserRole(user) {
+                console.log("Checking user role for:", user.uid);
                 const userRoleRef = doc(db, USER_ROLES_COLLECTION, user.uid);
                 let userRoleDoc;
                 try {
                     userRoleDoc = await getDoc(userRoleRef);
+                    console.log("User role doc fetched:", userRoleDoc.exists() ? userRoleDoc.data() : "Does not exist");
                 } catch (e) {
                     console.error("Error fetching user role doc: ", e);
                     showMessage("Error", "Could not fetch user role.", true);
@@ -399,8 +409,10 @@
                 if (userRoleDoc.exists()) {
                     // User exists, get their role
                     currentUserRole = userRoleDoc.data().role;
+                    console.log("User role found:", currentUserRole);
                 } else {
                     // User does not exist, check if they are the first user
+                    console.log("User role doc not found. Checking if first user...");
                     const rolesQuery = query(collection(db, USER_ROLES_COLLECTION));
                     let allUsersSnapshot;
                     try {
@@ -413,14 +425,17 @@
 
                     if (allUsersSnapshot.empty) {
                         // This is the first user EVER. Make them admin.
+                        console.log("This is the first user. Assigning 'admin' role.");
                         currentUserRole = 'admin';
                     } else {
                         // Not the first user, default to 'user'
+                        console.log("Not first user. Assigning 'user' role.");
                         currentUserRole = 'user';
                     }
                     
                     // Save the new role to Firestore
                     try {
+                        console.log("Saving new role to Firestore:", currentUserRole);
                         await setDoc(userRoleRef, { 
                             role: currentUserRole,
                             userId: user.uid
@@ -434,8 +449,10 @@
                 // Update UI based on role
                 userRoleDisplay.textContent = currentUserRole;
                 if (currentUserRole === 'admin' || currentUserRole === 'sub-admin') {
+                    console.log("Showing admin panel.");
                     adminPanel.classList.remove('hidden');
                 } else {
+                    console.log("Hiding admin panel.");
                     adminPanel.classList.add('hidden');
                 }
             }
@@ -443,13 +460,10 @@
             // --- Initial Authentication ---
             async function authenticateUser() {
                 try {
-                    // Use token if available (Canvas environment)
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        // Use anonymous sign-in (Public/Netlify environment)
-                        await signInAnonymously(auth);
-                    }
+                    console.log("Authenticating user with custom token...");
+                    // Use token from the environment (we know it exists from the check above)
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log("Sign-in with custom token successful.");
                 } catch (error) {
                     console.error("Authentication failed:", error);
                     // Display the error permanently on the loading screen
@@ -457,9 +471,6 @@
                     if (loadingSpinner) loadingSpinner.style.display = 'none';
                     
                     let errorMessage = `Authentication Failed: ${error.message}.`;
-                    if (error.code === 'auth/api-key-not-valid') {
-                        errorMessage += " Please check your firebaseConfig placeholder in the HTML.";
-                    }
                     
                     loadingText.textContent = errorMessage;
                     loadingText.classList.add('text-red-600', 'max-w-md', 'text-center', 'px-4');
@@ -468,6 +479,7 @@
 
             // --- Main App Initializer ---
             document.addEventListener('DOMContentLoaded', () => {
+                console.log("DOM content loaded.");
                 // Assign DOM elements now that the DOM is loaded
                 appLoading = document.getElementById('app-loading');
                 loadingText = document.getElementById('loading-text');
@@ -493,9 +505,11 @@
                 messageModalClose = document.getElementById('message-modal-close');
 
                 // Attach all event listeners
+                console.log("Attaching event listeners...");
                 messageModalClose.addEventListener('click', () => messageModal.classList.add('hidden'));
                 
                 logoutBtn.addEventListener('click', async () => {
+                    console.log("Logout clicked.");
                     appLoading.classList.remove('hidden');
                     await signOut(auth);
                     // onAuthStateChanged will handle the rest
@@ -512,8 +526,10 @@
 
             // --- Firestore Listeners ---
             function attachUserRolesListener() {
+                console.log("Attaching user roles listener to:", USER_ROLES_COLLECTION);
                 const rolesQuery = query(collection(db, USER_ROLES_COLLECTION));
                 onSnapshot(rolesQuery, (snapshot) => {
+                    console.log("User roles snapshot received:", snapshot.size, "docs");
                     const users = [];
                     snapshot.forEach((doc) => {
                         users.push({ id: doc.id, ...doc.data() });
@@ -526,8 +542,10 @@
             }
 
             function attachAssetsListener() {
+                console.log("Attaching assets listener to:", ASSETS_COLLECTION);
                 const assetsQuery = query(collection(db, ASSETS_COLLECTION));
                 onSnapshot(assetsQuery, (snapshot) => {
+                    console.log("Assets snapshot received:", snapshot.size, "docs");
                     const assets = [];
                     snapshot.forEach((doc) => {
                         assets.push({ id: doc.id, ...doc.data() });
@@ -691,11 +709,13 @@
                 try {
                     if (assetId) {
                         // Update existing asset
+                        console.log("Updating asset:", assetId);
                         const assetRef = doc(db, ASSETS_COLLECTION, assetId);
                         await updateDoc(assetRef, assetData);
                         showMessage("Success", "Asset updated successfully.", false);
                     } else {
                         // Add new asset
+                        console.log("Adding new asset...");
                         await addDoc(collection(db, ASSETS_COLLECTION), assetData);
                         showMessage("Success", "Asset added successfully.", false);
                     }
@@ -712,6 +732,7 @@
                     showMessage("Error", "You do not have permission to delete assets.", true);
                     return;
                 }
+                console.log("Deleting asset:", assetId);
                 try {
                     const assetRef = doc(db, ASSETS_COLLECTION, assetId);
                     await deleteDoc(assetRef);
