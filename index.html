@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Best Cement IT Asset Management App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -37,16 +37,32 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* UPDATED: Print Styles for Handover Form */
+        /* * ===============================================
+         * NEW AGGRESSIVE PRINT STYLES (To fix blank page)
+         * ===============================================
+         */
         @media print {
-            /* Explicitly hide all main UI parts */
-            #login-view, #main-view, #asset-modal, #user-modal, #toast {
+            /* Hide ALL direct children of body by default */
+            body > * {
                 display: none !important;
+                visibility: hidden !important;
             }
 
-            /* Remove min-height from #app container */
-            #app {
-                min-height: 0 !important;
+            /* Un-hide ONLY the print modal */
+            #print-modal {
+                display: block !important;
+                visibility: visible !important;
+                position: static !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            /* Hide the non-printable parts inside the modal */
+            #print-modal .fixed.inset-0, /* The background overlay */
+            #print-modal .hidden.sm\:inline-block, /* The centering span */
+            #print-modal-buttons {
+                display: none !important;
+                visibility: hidden !important;
             }
 
             /* Reset body and html */
@@ -56,17 +72,12 @@
                 padding: 0 !important;
             }
             
-            /* Make print modal and its content fill the page */
-            #print-modal {
-                position: static !important;
+            /* Force the modal content and form to be static blocks */
+            #print-modal-content, #printable-handover-form {
                 display: block !important;
                 visibility: visible !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            
-            #print-modal-content {
-                width: 100% !important;
+                position: static !important;
+                width: auto !important;
                 max-width: 100% !important;
                 box-shadow: none !important;
                 border: none !important;
@@ -75,19 +86,9 @@
                 overflow: visible !important;
             }
 
-            /* Make the printable form visible */
+            /* Add back the print margin ONLY to the form itself */
             #printable-handover-form {
-                display: block !important;
-                visibility: visible !important;
-                padding: 1cm !important; /* Add print margin */
-                margin: 0 !important;
-                border: none !important;
-                box-shadow: none !important;
-            }
-            
-            /* Hide modal overlay and buttons */
-            #print-modal > .fixed.inset-0, #print-modal-buttons {
-                 display: none !important;
+                padding: 1cm !important;
             }
 
             /* Ensure text is black */
@@ -219,7 +220,6 @@
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CUG Mobile</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Designation</th>
-                                        <!-- NEW: Location Header -->
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Added</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -337,7 +337,6 @@
                                         <input type="text" id="designation" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm">
                                     </div>
                                     
-                                    <!-- NEW: Location Field -->
                                     <div>
                                         <label for="location" class="block text-sm font-medium text-gray-700 required-label">Location</label>
                                         <select id="location" class="mt-1 form-select w-full border border-gray-300 rounded-md shadow-sm" required>
@@ -430,7 +429,7 @@
         </div>
     </div>
 
-    <!-- NEW: Print Handover Modal --><div id="print-modal" class="hidden fixed z-30 inset-0 overflow-y-auto">
+    <!-- Print Handover Modal --><div id="print-modal" class="hidden fixed z-30 inset-0 overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <!-- Background overlay -->
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
@@ -480,7 +479,6 @@
                                 <label class="text-sm text-gray-500">Department</label>
                                 <p id="print-department" class="font-semibold text-gray-900"></p>
                             </div>
-                            <!-- NEW: Location field in printout -->
                             <div>
                                 <label class="text-sm text-gray-500">Location</label>
                                 <p id="print-location" class="font-semibold text-gray-900"></p>
@@ -613,7 +611,7 @@
         const userFormTitle = $('#user-form-title');
         const cancelUserEditBtn = $('#cancel-user-edit-btn');
 
-        // NEW: Print Modal
+        // Print Modal
         const printModal = $('#print-modal');
         const cancelPrintBtn = $('#cancel-print-btn');
         const printHandoverBtn = $('#print-handover-btn');
@@ -654,7 +652,7 @@
             userForm.addEventListener('submit', handleUserFormSubmit);
             cancelUserEditBtn.addEventListener('click', resetUserForm);
 
-            // NEW: Print Modal Listeners
+            // Print Modal Listeners
             cancelPrintBtn.addEventListener('click', hidePrintModal);
             printHandoverBtn.addEventListener('click', printHandoverForm);
 
@@ -662,7 +660,6 @@
             assetTableBody.addEventListener('click', (e) => {
                 const editBtn = e.target.closest('.edit-asset-btn');
                 const deleteBtn = e.target.closest('.delete-asset-btn');
-                // NEW: Print button listener
                 const printBtn = e.target.closest('.print-asset-btn');
                 
                 if (editBtn) {
@@ -673,7 +670,6 @@
                     const id = parseInt(deleteBtn.dataset.id);
                     handleDeleteAsset(id);
                 }
-                // NEW: Handle print button click
                 if (printBtn) {
                     const id = parseInt(printBtn.dataset.id);
                     showPrintModal(id);
@@ -946,7 +942,6 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.cugmobile || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.department || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.designation || ''}</td>
-                    <!-- NEW: Location Cell -->
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.location || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${displayDate}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
@@ -958,7 +953,6 @@
                             <i class="fas fa-trash"></i>
                         </button>` : ''}
                         
-                        <!-- NEW: Show print button only if asset is 'Issued' -->
                         ${isIssued ? 
                         `<button class="print-asset-btn text-gray-600 hover:text-gray-900" data-id="${asset.id}" title="Print Handover Form">
                             <i class="fas fa-print"></i>
@@ -1043,7 +1037,7 @@
                 cugMobile: $('#cug-mobile').value,
                 department: $('#department').value,
                 designation: $('#designation').value,
-                location: $('#location').value, // NEW: Save location
+                location: $('#location').value,
                 date: $('#date').value,
             };
 
@@ -1104,7 +1098,7 @@
             $('#cug-mobile').value = asset.cugmobile;
             $('#department').value = asset.department;
             $('#designation').value = asset.designation;
-            $('#location').value = asset.location || 'HO'; // NEW: Load location
+            $('#location').value = asset.location || 'HO';
             $('#date').value = asset.date ? asset.date.split('T')[0] : '';
             
             const standardPrefixes = ['JUD/IT ASSET/', 'JSB/IT ASSET/'];
@@ -1168,7 +1162,7 @@
                     `"${asset.cugmobile || ''}"`,
                     `"${asset.department || ''}"`,
                     `"${asset.designation || ''}"`,
-                    `"${asset.location || ''}"`, // NEW: Export location
+                    `"${asset.location || ''}"`,
                     `"${asset.date ? asset.date.split('T')[0] : ''}"`
                 ].join(',')
             );
@@ -1188,7 +1182,7 @@
             showToast('Assets exported successfully!');
         }
         
-        // --- NEW: PRINT HANDOVER FUNCTIONS ---
+        // --- PRINT HANDOVER FUNCTIONS ---
 
         /**
          * Finds the asset data and populates the print modal.
@@ -1205,7 +1199,7 @@
             $('#print-employee-name').textContent = asset.employeename || 'N/A';
             $('#print-employee-id').textContent = asset.employeecode || 'N/A';
             $('#print-department').textContent = asset.department || 'N/A';
-            $('#print-location').textContent = asset.location || 'N/A'; // NEW: Populate location
+            $('#print-location').textContent = asset.location || 'N/A';
 
             $('#print-asset-make').textContent = asset.assetmake || 'N/A';
             $('#print-asset-serial').textContent = asset.assetserial || 'N/A';
@@ -1334,6 +1328,7 @@
                     }
                 } else {
                     state.users.push(savedUser);
+                    // Data.json()... // REMOVED THIS LINE
                 }
                 state.users.sort((a, b) => a.id - b.id);
                 
