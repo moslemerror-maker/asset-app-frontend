@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale-1.0">
     <title>Best Cement IT Asset Management App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -39,27 +39,30 @@
 
         /* UPDATED: Print Styles for Handover Form */
         @media print {
-            /* Hide everything except the printable form and its parents */
-            body > * {
+            /* Explicitly hide all main UI parts */
+            #login-view, #main-view, #asset-modal, #user-modal, #toast {
                 display: none !important;
             }
-            
-            #print-modal, #print-modal-content, #printable-handover-form {
-                display: block !important;
-                visibility: visible !important;
-                position: static !important;
+
+            /* Remove min-height from #app container */
+            #app {
+                min-height: 0 !important;
             }
 
-            /* Hide the non-printable parts of the modal */
-            #print-modal > .fixed.inset-0, #print-modal-buttons {
-                 display: none !important;
-            }
-
-            /* Reset body and layout */
+            /* Reset body and html */
             body, html {
                 background: #fff !important;
                 margin: 0 !important;
                 padding: 0 !important;
+            }
+            
+            /* Make print modal and its content fill the page */
+            #print-modal {
+                position: static !important;
+                display: block !important;
+                visibility: visible !important;
+                padding: 0 !important;
+                margin: 0 !important;
             }
             
             #print-modal-content {
@@ -69,17 +72,26 @@
                 border: none !important;
                 margin: 0 !important;
                 padding: 0 !important;
+                overflow: visible !important;
             }
 
+            /* Make the printable form visible */
             #printable-handover-form {
+                display: block !important;
+                visibility: visible !important;
                 padding: 1cm !important; /* Add print margin */
                 margin: 0 !important;
                 border: none !important;
                 box-shadow: none !important;
             }
+            
+            /* Hide modal overlay and buttons */
+            #print-modal > .fixed.inset-0, #print-modal-buttons {
+                 display: none !important;
+            }
 
             /* Ensure text is black */
-            body, #printable-handover-form, #printable-handover-form * {
+            #printable-handover-form, #printable-handover-form * {
                 color: #000 !important;
                 visibility: visible !important;
             }
