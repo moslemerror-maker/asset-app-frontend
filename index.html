@@ -253,7 +253,7 @@
             signOut,
             signInAnonymously,
             signInWithCustomToken
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth..js";
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
             getFirestore, 
             doc, 
@@ -273,8 +273,23 @@
         // Firebase Configuration
         // -------------------------------------------------------------------
         
-        // This app is designed to run ONLY in the Canvas environment.
-        // It requires __firebase_config and __initial_auth_token to be injected.
+        // This app can run in two modes:
+        // 1. Canvas Environment: It uses injected __firebase_config and __initial_auth_token.
+        // 2. Public Environment (Netlify/GitHub): It uses the manual firebaseConfig placeholder and anonymous auth.
+        
+        // --- THIS IS THE MANUAL CONFIG FOR PUBLIC DEPLOYMENT ---
+        // If __firebase_config is NOT provided by the environment,
+        // this placeholder will be used.
+        // PASTE YOUR FIREBASE CONFIG OBJECT HERE:
+        const firebaseConfigPlaceholder = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        // --------------------------------------------------------
 
         let app;
         let db;
@@ -283,33 +298,26 @@
         let firebaseConfig;
         let initialAuthToken;
 
-        // CRITICAL CHECK for environment variables
-        if (typeof __firebase_config === 'undefined' || !__firebase_config || 
-            typeof __initial_auth_token === 'undefined' || !__initial_auth_token) {
-            
-            // Environment variables are missing. This is a platform error.
-            // Show this error immediately and stop execution.
-            document.addEventListener('DOMContentLoaded', () => {
-                const appLoading = document.getElementById('app-loading');
-                const loadingText = document.getElementById('loading-text');
-                if (appLoading && loadingText) {
-                    const loadingSpinner = appLoading.querySelector('svg');
-                    if (loadingSpinner) loadingSpinner.style.display = 'none';
-                    loadingText.innerHTML = `Application Error: Required environment credentials are missing.<br>Please try refreshing the page.`;
-                    loadingText.classList.add('text-red-600', 'max-w-md', 'text-center', 'px-4');
-                } else {
-                    console.error("Fatal Error: app-loading elements not found.");
-                }
-            });
-            // Stop all further script execution
-            throw new Error("Missing required environment credentials (__firebase_config or __initial_auth_token).");
-        }
-
 
         try {
-            // At this point, we know the variables exist.
-            firebaseConfig = JSON.parse(__firebase_config);
-            initialAuthToken = __initial_auth_token;
+            // Check if Canvas environment variables are present
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                // We are in Canvas
+                firebaseConfig = JSON.parse(__firebase_config);
+                initialAuthToken = (typeof __initial_auth_token !== 'undefined') ? __initial_auth_token : null;
+                appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                
+                if (!initialAuthToken) {
+                    throw new Error("Canvas environment detected but __initial_auth_token is missing.");
+                }
+
+            } else {
+                // We are in a Public environment (Netlify, etc.)
+                firebaseConfig = firebaseConfigPlaceholder;
+                initialAuthToken = null; // Will use anonymous auth
+                // Use the projectId from the config as the appId
+                appId = firebaseConfig.projectId || 'default-app-id'; 
+            }
 
             // Initialize Firebase
             app = initializeApp(firebaseConfig);
@@ -318,10 +326,6 @@
             
             // Enable Firestore debug logging
             setLogLevel('debug');
-
-            // Firestore Collection Paths
-            // Use __app_id from the environment, fallback to 'default-app-id'
-            appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; 
             
             const ASSETS_COLLECTION = `/artifacts/${appId}/public/data/assets`;
             const USER_ROLES_COLLECTION = `/artifacts/${appId}/public/data/userRoles`;
@@ -460,10 +464,17 @@
             // --- Initial Authentication ---
             async function authenticateUser() {
                 try {
-                    console.log("Authenticating user with custom token...");
-                    // Use token from the environment (we know it exists from the check above)
-                    await signInWithCustomToken(auth, initialAuthToken);
-                    console.log("Sign-in with custom token successful.");
+                    // Use token if available (Canvas environment)
+                    if (initialAuthToken) {
+                        console.log("Authenticating user with custom token...");
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("Sign-in with custom token successful.");
+                    } else {
+                        // Use anonymous sign-in (Public/Netlify environment)
+                        console.log("Authenticating user anonymously...");
+                        await signInAnonymously(auth);
+                        console.log("Sign-in anonymously successful.");
+                    }
                 } catch (error) {
                     console.error("Authentication failed:", error);
                     // Display the error permanently on the loading screen
@@ -471,6 +482,9 @@
                     if (loadingSpinner) loadingSpinner.style.display = 'none';
                     
                     let errorMessage = `Authentication Failed: ${error.message}.`;
+                     if (error.code === 'auth/api-key-not-valid') {
+                        errorMessage += " Please check your firebaseConfig placeholder in the HTML.";
+                    }
                     
                     loadingText.textContent = errorMessage;
                     loadingText.classList.add('text-red-600', 'max-w-md', 'text-center', 'px-4');
