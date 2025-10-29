@@ -39,24 +39,32 @@
 
         /* UPDATED: Print Styles for Handover Form */
         @media print {
-            /* Hide ALL elements by default */
-            body * {
-                visibility: hidden !important;
+            /* Hide everything except the printable form and its parents */
+            body > * {
+                display: none !important;
             }
             
-            /* Make the printable area and its parents/children visible */
-            #printable-handover-form, #printable-handover-form * {
-                visibility: visible !important;
-            }
-            
-            /* Reset the layout for printing */
-            body, html, #app, #print-modal, #print-modal-content {
-                position: static !important;
+            #print-modal, #print-modal-content, #printable-handover-form {
                 display: block !important;
-                width: auto !important;
-                height: auto !important;
-                overflow: visible !important;
+                visibility: visible !important;
+                position: static !important;
+            }
+
+            /* Hide the non-printable parts of the modal */
+            #print-modal > .fixed.inset-0, #print-modal-buttons {
+                 display: none !important;
+            }
+
+            /* Reset body and layout */
+            body, html {
                 background: #fff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            #print-modal-content {
+                width: 100% !important;
+                max-width: 100% !important;
                 box-shadow: none !important;
                 border: none !important;
                 margin: 0 !important;
@@ -64,26 +72,20 @@
             }
 
             #printable-handover-form {
-                /* Reset margins for the form itself */
+                padding: 1cm !important; /* Add print margin */
                 margin: 0 !important;
-                padding: 1cm !important; /* Add some print margin */
                 border: none !important;
                 box-shadow: none !important;
             }
-            
+
             /* Ensure text is black */
             body, #printable-handover-form, #printable-handover-form * {
                 color: #000 !important;
+                visibility: visible !important;
             }
 
-            /* Prevent page breaks inside key sections */
             .print-avoid-break {
                 page-break-inside: avoid;
-            }
-
-            /* Hide the buttons on the form */
-            #print-modal-buttons {
-                display: none !important;
             }
         }
     </style>
