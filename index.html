@@ -37,52 +37,53 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* NEW: Print Styles for Handover Form */
+        /* UPDATED: Print Styles for Handover Form */
         @media print {
-            body {
-                background-color: #fff;
+            /* Hide ALL elements by default */
+            body * {
+                visibility: hidden !important;
             }
-            /* Hide everything except the print modal content */
-            #app > *, #asset-modal, #user-modal, #toast {
-                display: none !important;
-            }
-            #print-modal {
-                position: static;
-                display: block !important;
+            
+            /* Make the printable area and its parents/children visible */
+            #printable-handover-form, #printable-handover-form * {
                 visibility: visible !important;
             }
-            #print-modal-content {
-                width: 100%;
-                max-width: 100%;
-                border: none;
-                box-shadow: none;
-                padding: 0;
-                margin: 0;
-            }
-            /* Hide the modal's internal buttons when printing */
-            #print-modal-buttons {
-                display: none;
-            }
-            /* Ensure the print content is visible */
-            #printable-handover-form {
+            
+            /* Reset the layout for printing */
+            body, html, #app, #print-modal, #print-modal-content {
+                position: static !important;
                 display: block !important;
-                padding: 0;
-                margin: 0;
+                width: auto !important;
+                height: auto !important;
+                overflow: visible !important;
+                background: #fff !important;
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
-            /* Remove shadows and borders for printing */
-            .print-no-shadow {
+
+            #printable-handover-form {
+                /* Reset margins for the form itself */
+                margin: 0 !important;
+                padding: 1cm !important; /* Add some print margin */
+                border: none !important;
                 box-shadow: none !important;
             }
-            .print-no-border {
-                border: none !important;
-            }
+            
             /* Ensure text is black */
             body, #printable-handover-form, #printable-handover-form * {
                 color: #000 !important;
             }
-            /* Prevent page breaks inside the form */
+
+            /* Prevent page breaks inside key sections */
             .print-avoid-break {
                 page-break-inside: avoid;
+            }
+
+            /* Hide the buttons on the form */
+            #print-modal-buttons {
+                display: none !important;
             }
         }
     </style>
@@ -204,6 +205,8 @@
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CUG Mobile</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Designation</th>
+                                        <!-- NEW: Location Header -->
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Added</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
@@ -316,8 +319,18 @@
                                     </div>
                                     
                                     <div>
-                                        <label for="designation" class="block text-sm font-medium text-gray-700">Designation</slabel>
+                                        <label for="designation" class="block text-sm font-medium text-gray-700">Designation</label>
                                         <input type="text" id="designation" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm">
+                                    </div>
+                                    
+                                    <!-- NEW: Location Field -->
+                                    <div>
+                                        <label for="location" class="block text-sm font-medium text-gray-700 required-label">Location</label>
+                                        <select id="location" class="mt-1 form-select w-full border border-gray-300 rounded-md shadow-sm" required>
+                                            <option value="HO">HO</option>
+                                            <option value="JUD Plant">JUD Plant</option>
+                                            <option value="JSB Plant">JSB Plant</option>
+                                        </select>
                                     </div>
                                     
                                     <div>
@@ -452,6 +465,11 @@
                             <div>
                                 <label class="text-sm text-gray-500">Department</label>
                                 <p id="print-department" class="font-semibold text-gray-900"></p>
+                            </div>
+                            <!-- NEW: Location field in printout -->
+                            <div>
+                                <label class="text-sm text-gray-500">Location</label>
+                                <p id="print-location" class="font-semibold text-gray-900"></p>
                             </div>
                         </div>
                     </div>
@@ -870,6 +888,7 @@
                 const department = (asset.department || '').toLowerCase();
                 const employeeName = (asset.employeename || '').toLowerCase();
                 const employeeCode = (asset.employeecode || '').toLowerCase();
+                const location = (asset.location || '').toLowerCase(); // Search location
                 
                 return (
                     assetName.includes(state.assetFilter) ||
@@ -878,7 +897,8 @@
                     assetSerial.includes(state.assetFilter) ||
                     department.includes(state.assetFilter) ||
                     employeeName.includes(state.assetFilter) ||
-                    employeeCode.includes(state.assetFilter)
+                    employeeCode.includes(state.assetFilter) ||
+                    location.includes(state.assetFilter) // Search location
                 );
             });
 
@@ -912,6 +932,8 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.cugmobile || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.department || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.designation || ''}</td>
+                    <!-- NEW: Location Cell -->
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.location || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${displayDate}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                         <button class="edit-asset-btn text-blue-600 hover:text-blue-900" data-id="${asset.id}" title="Edit">
@@ -1007,6 +1029,7 @@
                 cugMobile: $('#cug-mobile').value,
                 department: $('#department').value,
                 designation: $('#designation').value,
+                location: $('#location').value, // NEW: Save location
                 date: $('#date').value,
             };
 
@@ -1067,6 +1090,7 @@
             $('#cug-mobile').value = asset.cugmobile;
             $('#department').value = asset.department;
             $('#designation').value = asset.designation;
+            $('#location').value = asset.location || 'HO'; // NEW: Load location
             $('#date').value = asset.date ? asset.date.split('T')[0] : '';
             
             const standardPrefixes = ['JUD/IT ASSET/', 'JSB/IT ASSET/'];
@@ -1115,7 +1139,7 @@
                 return;
             }
 
-            const headers = ['AssetNumber', 'Category', 'AssetName', 'MakeModel', 'SerialNo', 'Status', 'EmployeeName', 'EmployeeCode', 'CUGMobile', 'Department', 'Designation', 'Date'];
+            const headers = ['AssetNumber', 'Category', 'AssetName', 'MakeModel', 'SerialNo', 'Status', 'EmployeeName', 'EmployeeCode', 'CUGMobile', 'Department', 'Designation', 'Location', 'Date'];
             
             const rows = state.assets.map(asset => 
                 [
@@ -1130,6 +1154,7 @@
                     `"${asset.cugmobile || ''}"`,
                     `"${asset.department || ''}"`,
                     `"${asset.designation || ''}"`,
+                    `"${asset.location || ''}"`, // NEW: Export location
                     `"${asset.date ? asset.date.split('T')[0] : ''}"`
                 ].join(',')
             );
@@ -1166,6 +1191,7 @@
             $('#print-employee-name').textContent = asset.employeename || 'N/A';
             $('#print-employee-id').textContent = asset.employeecode || 'N/A';
             $('#print-department').textContent = asset.department || 'N/A';
+            $('#print-location').textContent = asset.location || 'N/A'; // NEW: Populate location
 
             $('#print-asset-make').textContent = asset.assetmake || 'N/A';
             $('#print-asset-serial').textContent = asset.assetserial || 'N/A';
