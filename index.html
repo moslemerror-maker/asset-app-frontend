@@ -37,6 +37,14 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* --- Visual upgrades for management-friendly look --- */
+        body { background: linear-gradient(135deg, #f3f4f6 0%, #eef2ff 50%, #fff 100%); }
+        .login-gradient { background: linear-gradient(180deg, rgba(79,70,229,0.06), rgba(99,102,241,0.04)); border: 1px solid rgba(99,102,241,0.08); }
+        .brand-tag { color: #4f46e5; font-weight: 700; }
+        .fancy-btn { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        .fancy-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(79,70,229,0.12); }
+    
+
         /* * ===============================================
          * NEW AGGRESSIVE PRINT STYLES (To fix blank page)
          * ===============================================
@@ -749,17 +757,29 @@
 
         // --- AUTHENTICATION & DATA LOADING ---
 
-        async function checkPersistedLogin() {
-            const persistedUser = localStorage.getItem('currentUser');
-            if (persistedUser) {
-                try {
-                    state.currentUser = JSON.parse(persistedUser);
-                    setMainLoading(true);
-                    await loadInitialData();
-                    renderUI();
-                    setMainLoading(false);
-                    showToast(`Welcome back, ${state.currentUser.username}!`);
-                } catch (e) {
+        
+async function checkPersistedLogin() {
+    const persistedUser = localStorage.getItem('currentUser');
+    const persistedToken = localStorage.getItem('authToken');
+    if (persistedUser && persistedToken) {
+        try {
+            state.currentUser = JSON.parse(persistedUser);
+            state.authToken = persistedToken;
+            setMainLoading(true);
+            await loadInitialData();
+            renderUI();
+            setMainLoading(false);
+            showToast(`Welcome back, ${state.currentUser.username}!`);
+        } catch (e) {
+            console.error('Failed persisted login load:', e);
+            clearAuth();
+            renderUI();
+        }
+    } else {
+        renderUI();
+    }
+}
+ catch (e) {
                     localStorage.removeItem('currentUser');
                     state.currentUser = null;
                     renderUI();
@@ -769,29 +789,78 @@
             }
         }
 
-        async function handleLogin(e) {
-            e.preventDefault();
-            setLoginLoading(true);
-            loginError.classList.add('hidden');
-            
-            const username = $('#username').value;
-            const password = $('#password').value;
-            
-            try {
-                const response = await fetch(`${API_URL}/api/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
+        
+async function handleLogin(e) {
+    e.preventDefault();
+    setLoginLoading(true);
+    loginError.classList.add('hidden');
+
+    const username = $('#username').value;
+    const password = $('#password').value;
+
+    try {
+        const response = await fetch(`${API_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({ error: 'Login failed' }));
+            loginError.textContent = err.error || 'Invalid username or password.';
+            loginError.classList.remove('hidden');
+            return;
+        }
+
+        const body = await response.json(); // expected { token, user }
+        saveAuth(body.token, body.user);
+
+        setMainLoading(true);
+        try {
+            await loadInitialData();
+            renderUI();
+            showToast(`Welcome, ${body.user.username}!`);
+        } catch (loadErr) {
+            console.error('Failed to load initial data after login:', loadErr);
+            clearAuth();
+            loginError.textContent = 'Login succeeded but failed to load app data. Try again.';
+            loginError.classList.remove('hidden');
+            renderUI();
+        } finally {
+            setMainLoading(false);
+        }
+    } catch (err) {
+        console.error('Login fetch error:', err);
+        loginError.textContent = 'Cannot connect to server. Is it running?';
+        loginError.classList.remove('hidden');
+    } finally {
+        setLoginLoading(false);
+    }
+}
+);
                 
                 if (response.ok) {
                     const user = await response.json();
                     state.currentUser = user;
                     localStorage.setItem('currentUser', JSON.stringify(user));
                     
-                    await loadInitialData(); 
-                    renderUI(); 
-                    showToast(`Welcome, ${user.username}!`);
+                    // Show main loading while we fetch data
+                    setMainLoading(true);
+                    try {
+                        await loadInitialData();
+                        renderUI();
+                        showToast(`Welcome, ${user.username}!`);
+                    } catch (loadErr) {
+                        console.error('Failed to load initial data after login:', loadErr);
+                        // keep user logged out on failure to load data
+                        localStorage.removeItem('currentUser');
+                        state.currentUser = null;
+                        renderUI();
+                        loginError.textContent = 'Login succeeded but failed to load app data. Try again.';
+                        loginError.classList.remove('hidden');
+                    } finally {
+                        setMainLoading(false);
+                    }
                 } else {
                     const err = await response.json();
                     loginError.textContent = err.error || 'Invalid username or password.';
@@ -809,8 +878,8 @@
         async function loadInitialData() {
             try {
                 const [assetsRes, usersRes] = await Promise.all([
-                    fetch(`${API_URL}/api/assets`),
-                    state.currentUser.role === 'admin' ? fetch(`${API_URL}/api/users`) : Promise.resolve(null)
+                    authFetch(`${API_URL}/api/assets`),
+                    state.currentUser && state.currentUser.role === 'admin' ? authFetch(`${API_URL}/api/users`) : Promise.resolve(null)
                 ]);
 
                 if (!assetsRes.ok) throw new Error('Failed to load assets');
@@ -829,7 +898,8 @@
             } catch (err) {
                 console.error('Data loading error:', err);
                 showToast('Error loading data from database.', true);
-                handleLogout();
+                // Rethrow so caller (checkPersistedLogin or handleLogin) can decide what to do
+                throw err;
             }
         }
 
@@ -948,7 +1018,7 @@
                         <button class="edit-asset-btn text-blue-600 hover:text-blue-900" data-id="${asset.id}" title="Edit">
                             <i class="fas fa-edit"></i>
                         </button>
-                        ${state.currentUser.username === 'admin' ? 
+                        ${state.currentUser && state.currentUser.role === 'admin' ? 
                         `<button class="delete-asset-btn text-red-600 hover:text-red-900" data-id="${asset.id}" title="Delete">
                             <i class="fas fa-trash"></i>
                         </button>` : ''}
@@ -1116,13 +1186,13 @@
         }
 
         async function handleDeleteAsset(id) {
-            if (state.currentUser.username !== 'admin') {
+            if (state.currentUser.role !== 'admin') {
                 showToast('You do not have permission to delete assets.', true);
                 return;
             }
 
             try {
-                const response = await fetch(`${API_URL}/api/assets/${id}`, {
+                const response = await authFetch(`${API_URL}/api/assets/${id}`, {
                     method: 'DELETE'
                 });
 
@@ -1361,7 +1431,7 @@
         
         async function handleDeleteUser(id) {
             try {
-                const response = await fetch(`${API_URL}/api/users/${id}`, {
+                const response = await authFetch(`${API_URL}/api/users/${id}`, {
                     method: 'DELETE'
                 });
 
