@@ -83,6 +83,59 @@
                 page-break-inside: avoid;
             }
         }
+
+        /* --- NEW: Chatbot Styles --- */
+        #chatbot-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: #4f46e5; /* Indigo-600 */
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 40;
+        }
+        #chatbot-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        #chatbot-window {
+            position: fixed;
+            bottom: 7rem;
+            right: 2rem;
+            width: 350px;
+            height: 450px;
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            z-index: 40;
+            transition: all 0.3s ease;
+            transform-origin: bottom right;
+        }
+        #chat-messages {
+            height: calc(100% - 110px); /* Total height minus header and form */
+            overflow-y: auto;
+        }
+        .user-message {
+            background-color: #4f46e5; /* Indigo-600 */
+            color: white;
+            align-self: flex-end;
+            border-radius: 0.75rem 0.75rem 0 0.75rem;
+        }
+        .bot-message {
+            background-color: #e5e7eb; /* Gray-200 */
+            color: #1f2937; /* Gray-800 */
+            align-self: flex-start;
+            border-radius: 0.75rem 0.75rem 0.75rem 0;
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
@@ -313,7 +366,6 @@
                                         <input type="tel" id="cug-mobile" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm">
                                     </div>
                                     
-                                    <!-- NEW: Department Field -->
                                     <div>
                                         <label for="department" class="block text-sm font-medium text-gray-700">Department</label>
                                         <input type="text" id="department" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm" placeholder="e.g., IT, Sales, HR">
@@ -338,7 +390,6 @@
                                         <input type="date" id="date" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm" required>
                                     </div>
 
-                                    <!-- NEW: Notes Field -->
                                     <div>
                                         <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
                                         <textarea id="notes" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm" rows="3" placeholder="Add any extra notes here..."></textarea>
@@ -535,7 +586,7 @@
         </div>
     </div>
 
-    <!-- NEW: Bulk Import Modal --><div id="import-modal" class="hidden fixed z-20 inset-0 overflow-y-auto">
+    <!-- Bulk Import Modal --><div id="import-modal" class="hidden fixed z-20 inset-0 overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
@@ -1418,17 +1469,18 @@
         // --- NEW: BULK IMPORT FUNCTIONS ---
 
         /**
-         * A robust CSV/TSV parser that handles quotes and pasted Excel data.
-         * @param {string} text - The raw text pasted from Excel/CSV.
+         * A robust parser for data pasted from Excel (which uses TABS).
+         * @param {string} text - The raw text pasted from Excel.
          */
         function parsePastedData(text) {
             const lines = text.trim().split('\n');
             const separator = '\t'; // Excel pastes with TABS
             
+            // Trim headers to remove any hidden characters
             const header = lines[0].split(separator).map(h => h.trim());
             const colMap = {};
             header.forEach((h, i) => {
-                colMap[h.trim()] = i;
+                colMap[h.trim()] = i; // Map the exact header name to its index
             });
             
             const data = [];
@@ -1437,11 +1489,12 @@
                 const values = lines[i].split(separator);
                 const row = {};
                 for (const key in colMap) {
+                    // Get the value, or an empty string if it's blank
                     row[key] = (values[colMap[key]] || '').trim();
                 }
                 data.push(row);
             }
-            return data;
+            return { data, colMap };
         }
 
         function showImportModal() {
@@ -1462,20 +1515,24 @@
 
             const existingAssetCodes = new Set(state.assets.map(a => `${a.assetprefix}${a.assetnumber}`));
             
-            let rows;
+            let parsed;
             try {
-                rows = parsePastedData(data);
+                parsed = parsePastedData(data);
             } catch(e) {
                 console.error("Parsing error:", e);
                 showToast('Error parsing pasted data. Please check the format.', true);
                 return;
             }
 
-            // Check if all required headers are present by checking the first row
-            const firstRow = rows[0];
-            if (firstRow['Asset Code'] === undefined || firstRow['Asset Name'] === undefined || firstRow['Notes'] === undefined) {
-                 showToast("Error: Data must contain 'Asset Code', 'Asset Name', and 'Notes' columns.", true);
-                 return;
+            const { data: rows, colMap } = parsed;
+
+            // Check if all required headers from YOUR EXCEL file are present
+            const requiredHeaders = ['Asset Code', 'Asset Name', 'Stock Status', 'Location', 'Assigned date', 'Notes'];
+            for (const h of requiredHeaders) {
+                if (colMap[h] === undefined) {
+                    showToast(`Error: Header row is missing required column: "${h}"`, true);
+                    return;
+                }
             }
 
             let successCount = 0;
@@ -1500,25 +1557,25 @@
                 const assetNumber = lastSlash > -1 ? assetCode.substring(lastSlash + 1) : assetCode;
 
                 const csvStatus = row['Stock Status'] || 'In Stock';
-                const appStatus = (csvStatus === 'Used' || csvStatus === 'Issued') ? 'Issued' : 'In Stock';
+                const appStatus = (csvStatus.toLowerCase() === 'used' || csvStatus.toLowerCase() === 'issued') ? 'Issued' : 'In Stock';
                 
                 // This mapping matches your Excel file to your database
                 const assetData = {
                     assetPrefix: assetPrefix,
                     assetNumber: assetNumber,
-                    category: row['Asset Name'] || 'Other', // Your 'Asset Name' column (Laptop/Desktop)
-                    assetName: row['Notes'] || '', // Your 'Notes' column (i5/8GB/1TB) is the description
+                    category: row['Asset Name'] || 'Other', // Excel 'Asset Name' -> App 'Category'
+                    assetName: row['Notes'] || '', // Excel 'Notes' -> App 'Asset Name / Description'
                     assetMake: row['Make/Model'] || '',
                     assetSerial: row['Serial no.'] || '',
                     status: appStatus,
                     employeeName: appStatus === 'Issued' ? (row['Assigned to'] || '') : '',
-                    employeeCode: appStatus === 'Issued' ? '' : '', // Employee Code is not in your Excel
+                    employeeCode: '', // Not in your Excel file, so we send blank
                     cugMobile: row['CUG Mobile Number'] || '',
-                    department: '', // This is the NEW 'Department' field, blank for now
+                    department: '', // NEW Field - Not in your Excel file, so we send blank
                     designation: row['Designation'] || '',
                     location: row['Location'] || 'HO',
                     date: row['Assigned date'] || new Date().toISOString().split('T')[0],
-                    notes: '' // This is the NEW 'Notes' field, blank for now
+                    notes: '' // NEW Field - Not in your Excel file, so we send blank
                 };
                 
                 try {
