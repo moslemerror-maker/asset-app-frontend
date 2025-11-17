@@ -37,18 +37,11 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* * ===============================================
-         * NEW AGGRESSIVE PRINT STYLES (To fix blank page)
-         * ===============================================
-         */
         @media print {
-            /* Hide ALL direct children of body by default */
             body > * {
                 display: none !important;
                 visibility: hidden !important;
             }
-
-            /* Un-hide ONLY the print modal */
             #print-modal {
                 display: block !important;
                 visibility: visible !important;
@@ -56,23 +49,17 @@
                 padding: 0 !important;
                 margin: 0 !important;
             }
-            
-            /* Hide the non-printable parts inside the modal */
-            #print-modal .fixed.inset-0, /* The background overlay */
-            #print-modal .hidden.sm\:inline-block, /* The centering span */
+            #print-modal .fixed.inset-0,
+            #print-modal .hidden.sm\:inline-block,
             #print-modal-buttons {
                 display: none !important;
                 visibility: hidden !important;
             }
-
-            /* Reset body and html */
             body, html {
                 background: #fff !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
-            
-            /* Force the modal content and form to be static blocks */
             #print-modal-content, #printable-handover-form {
                 display: block !important;
                 visibility: visible !important;
@@ -85,18 +72,13 @@
                 padding: 0 !important;
                 overflow: visible !important;
             }
-
-            /* Add back the print margin ONLY to the form itself */
             #printable-handover-form {
                 padding: 1cm !important;
             }
-
-            /* Ensure text is black */
             #printable-handover-form, #printable-handover-form * {
                 color: #000 !important;
                 visibility: visible !important;
             }
-
             .print-avoid-break {
                 page-break-inside: avoid;
             }
@@ -187,6 +169,10 @@
                         <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                             <h2 class="text-2xl font-bold text-gray-800">Asset Dashboard</h2>
                             <div class="flex items-center space-x-3">
+                                <!-- NEW: Admin Bulk Import Button -->
+                                <button id="bulk-import-btn" class="admin-only hidden flex items-center px-4 py-2 border border-orange-600 rounded-lg text-sm font-medium text-orange-700 bg-white hover:bg-orange-50 shadow-sm transition duration-200">
+                                    <i class="fas fa-upload mr-2"></i>Admin Bulk Import
+                                </button>
                                 <button id="export-btn" class="flex items-center px-4 py-2 border border-green-600 rounded-lg text-sm font-medium text-green-700 bg-white hover:bg-green-50 shadow-sm transition duration-200">
                                     <i class="fas fa-file-excel mr-2"></i>Export to CSV/Excel
                                 </button>
@@ -211,16 +197,17 @@
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset No.</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset Name</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset Name / Desc</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Make/Model</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serial No.</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee Name</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee Code</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CUG Mobile</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th> <!-- NEW -->
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Designation</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th> <!-- NEW -->
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Added</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
@@ -285,8 +272,8 @@
                                             </select>
                                         </div>
                                         <div>
-                                            <label for="asset-name" class="block text-sm font-medium text-gray-700 required-label">Asset Name</label>
-                                            <input type="text" id="asset-name" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm" placeholder="e.g., Dell XPS 15" required>
+                                            <label for="asset-name" class="block text-sm font-medium text-gray-700 required-label">Asset Name / Description</label>
+                                            <input type="text" id="asset-name" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm" placeholder="e.g., i5 11th gen/8gb ram/1TB" required>
                                         </div>
                                     </div>
                                     
@@ -316,7 +303,7 @@
                                                 <input type="text" id="employee-name" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm">
                                             </div>
                                             <div>
-                                                <label for="employee-code" class="block text-sm font-medium text-gray-700 required-label">Employee Code</label>
+                                                <label for="employee-code" class="block text-sm font-medium text-gray-700">Employee Code</label>
                                                 <input type="tel" id="employee-code" pattern="[0-9]*" title="Please enter only numbers." class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm">
                                             </div>
                                         </div>
@@ -327,11 +314,12 @@
                                         <input type="tel" id="cug-mobile" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm">
                                     </div>
                                     
+                                    <!-- NEW: Department Field -->
                                     <div>
                                         <label for="department" class="block text-sm font-medium text-gray-700">Department</label>
-                                        <input type="text" id="department" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm">
+                                        <input type="text" id="department" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm" placeholder="e.g., IT, Sales, HR">
                                     </div>
-                                    
+
                                     <div>
                                         <label for="designation" class="block text-sm font-medium text-gray-700">Designation</label>
                                         <input type="text" id="designation" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm">
@@ -350,6 +338,13 @@
                                         <label for="date" class="block text-sm font-medium text-gray-700 required-label">Date</label>
                                         <input type="date" id="date" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm" required>
                                     </div>
+
+                                    <!-- NEW: Notes Field -->
+                                    <div>
+                                        <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
+                                        <textarea id="notes" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm" rows="3" placeholder="Add any extra notes here..."></textarea>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -477,7 +472,7 @@
                             </div>
                             <div>
                                 <label class="text-sm text-gray-500">Department</label>
-                                <p id="print-department" class="font-semibold text-gray-900"></p>
+                                <p id="print-department" class="font-semibold text-gray-900"></p> <!-- UPDATED -->
                             </div>
                             <div>
                                 <label class="text-sm text-gray-500">Location</label>
@@ -514,7 +509,7 @@
                     <div class="mt-6 print-avoid-break">
                         <label class="text-sm text-gray-500">Notes:</label>
                         <div id="print-notes" class="w-full h-20 border border-gray-300 rounded-lg p-2 text-sm text-gray-600">
-                            <!-- You can add a notes field in your asset modal if you want to populate this -->
+                            <!-- This will be populated from the new Notes field -->
                         </div>
                     </div>
 
@@ -539,6 +534,42 @@
                     </button>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Bulk Import Modal --><div id="import-modal" class="hidden fixed z-20 inset-0 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-orange-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <i class="fas fa-upload text-orange-600"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Admin Bulk Import</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500 mb-2">
+                                    Copy all data from your Excel/CSV file (including the header row) and paste it into the box below.
+                                </p>
+                                <textarea id="import-data" class="w-full h-48 form-textarea border border-gray-300 rounded-md shadow-sm font-mono text-xs" placeholder="Sl No,Asset Code,Asset Name,Make/Model..."></textarea>
+                                <p class="text-xs text-gray-400 mt-1">
+                                    The import will automatically skip any assets where the 'Asset Code' already exists in the database.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" id="process-import-btn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-orange-600 text-base font-medium text-white hover:bg-orange-700 sm:ml-3 sm:w-auto sm:text-sm">
+                        Process Import
+                    </button>
+                    <button type="button" id="cancel-import-btn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -588,6 +619,7 @@
         const addAssetBtn = $('#add-asset-btn');
         const exportBtn = $('#export-btn');
         const searchInput = $('#search-input');
+        const bulkImportBtn = $('#bulk-import-btn'); // NEW
 
         // Asset Modal
         const assetModal = $('#asset-modal');
@@ -615,6 +647,12 @@
         const printModal = $('#print-modal');
         const cancelPrintBtn = $('#cancel-print-btn');
         const printHandoverBtn = $('#print-handover-btn');
+
+        // Import Modal (NEW)
+        const importModal = $('#import-modal');
+        const cancelImportBtn = $('#cancel-import-btn');
+        const processImportBtn = $('#process-import-btn');
+        const importData = $('#import-data');
         
         const toast = $('#toast');
         const toastMessage = $('#toast-message');
@@ -651,6 +689,10 @@
             closeUserModalBtn.addEventListener('click', hideUserModal);
             userForm.addEventListener('submit', handleUserFormSubmit);
             cancelUserEditBtn.addEventListener('click', resetUserForm);
+            bulkImportBtn.addEventListener('click', showImportModal); // NEW
+            cancelImportBtn.addEventListener('click', hideImportModal); // NEW
+            processImportBtn.addEventListener('click', handleProcessImport); // NEW
+
 
             // Print Modal Listeners
             cancelPrintBtn.addEventListener('click', hidePrintModal);
@@ -769,7 +811,6 @@
             }
         }
 
-        // CORRECTED handleLogin function
         async function handleLogin(e) {
             e.preventDefault();
             setLoginLoading(true);
@@ -786,14 +827,10 @@
                 });
                 
                 if (response.ok) {
-                    // This is the response server.js is sending: { id, username, role }
                     const user = await response.json(); 
-                    
-                    // Save user to state and localStorage
                     state.currentUser = user;
                     localStorage.setItem('currentUser', JSON.stringify(user));
                     
-                    // Show main loading while we fetch data
                     setMainLoading(true);
                     try {
                         await loadInitialData();
@@ -823,7 +860,6 @@
             }
         }
 
-        // CORRECTED loadInitialData (uses standard fetch)
         async function loadInitialData() {
             try {
                 const [assetsRes, usersRes] = await Promise.all([
@@ -847,7 +883,6 @@
             } catch (err) {
                 console.error('Data loading error:', err);
                 showToast('Error loading data from database.', true);
-                // Don't log out, just throw the error so login can handle it
                 throw err;
             }
         }
@@ -873,7 +908,7 @@
 
             CATEGORIES.forEach(category => {
                 const stock = assets.filter(a => a.category === category && a.status === 'In Stock').length;
-                const issued = assets.filter(a => a.category === category && a.status === 'Issued').length;
+                const issued = assets.filter(a => a.category === category && (a.status === 'Issued' || a.status === 'Used')).length;
                 
                 totalStock += stock;
                 totalIssued += issued;
@@ -917,7 +952,8 @@
                 const department = (asset.department || '').toLowerCase();
                 const employeeName = (asset.employeename || '').toLowerCase();
                 const employeeCode = (asset.employeecode || '').toLowerCase();
-                const location = (asset.location || '').toLowerCase(); // Search location
+                const location = (asset.location || '').toLowerCase();
+                const notes = (asset.notes || '').toLowerCase();
                 
                 return (
                     assetName.includes(state.assetFilter) ||
@@ -927,7 +963,8 @@
                     department.includes(state.assetFilter) ||
                     employeeName.includes(state.assetFilter) ||
                     employeeCode.includes(state.assetFilter) ||
-                    location.includes(state.assetFilter) // Search location
+                    location.includes(state.assetFilter) ||
+                    notes.includes(state.assetFilter)
                 );
             });
 
@@ -943,7 +980,7 @@
                 tr.className = 'hover:bg-gray-50';
                 
                 const displayDate = asset.date ? asset.date.split('T')[0] : 'N/A';
-                const isIssued = asset.status === 'Issued';
+                const isIssued = asset.status === 'Issued' || asset.status === 'Used';
 
                 tr.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${asset.assetprefix}${asset.assetnumber}</td>
@@ -959,9 +996,10 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.employeename || 'N/A'}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.employeecode || 'N/A'}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.cugmobile || ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.department || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.department || ''}</td> <!-- NEW -->
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.designation || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.location || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${(asset.notes || '').substring(0, 20)}...</td> <!-- NEW -->
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${displayDate}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                         <button class="edit-asset-btn text-blue-600 hover:text-blue-900" data-id="${asset.id}" title="Edit">
@@ -983,14 +1021,12 @@
         }
 
         function toggleIssuedFields(status) {
-            if (status === 'Issued') {
+            if (status === 'Issued' || status === 'Used') { // Support for 'Used' status from CSV
                 issuedToFields.classList.remove('hidden');
                 employeeName.required = true;
-                employeeCode.required = true;
             } else {
                 issuedToFields.classList.add('hidden');
                 employeeName.required = false;
-                employeeCode.required = false;
                 employeeName.value = '';
                 employeeCode.value = '';
             }
@@ -1027,10 +1063,9 @@
             
             const status = $('#asset-status').value;
             const empName = $('#employee-name').value;
-            const empCode = $('#employee-code').value;
 
-            if (status === 'Issued' && (!empName || !empCode)) {
-                showToast('Employee Name and Code are required for "Issued" assets.', true);
+            if (status === 'Issued' && !empName) {
+                showToast('Employee Name is required for "Issued" assets.', true);
                 return;
             }
             
@@ -1052,12 +1087,13 @@
                 assetSerial: $('#asset-serial').value,
                 status: status,
                 employeeName: status === 'Issued' ? empName : '',
-                employeeCode: status === 'Issued' ? empCode : '',
+                employeeCode: status === 'Issued' ? $('#employee-code').value : '',
                 cugMobile: $('#cug-mobile').value,
-                department: $('#department').value,
+                department: $('#department').value, // NEW
                 designation: $('#designation').value,
                 location: $('#location').value,
                 date: $('#date').value,
+                notes: $('#notes').value, // NEW
             };
 
             const isEditing = !!state.editingAssetId;
@@ -1115,10 +1151,11 @@
             employeeName.value = asset.employeename;
             employeeCode.value = asset.employeecode;
             $('#cug-mobile').value = asset.cugmobile;
-            $('#department').value = asset.department;
+            $('#department').value = asset.department; // NEW
             $('#designation').value = asset.designation;
             $('#location').value = asset.location || 'HO';
             $('#date').value = asset.date ? asset.date.split('T')[0] : '';
+            $('#notes').value = asset.notes; // NEW
             
             const standardPrefixes = ['JUD/IT ASSET/', 'JSB/IT ASSET/'];
             if (standardPrefixes.includes(asset.assetprefix)) {
@@ -1166,7 +1203,7 @@
                 return;
             }
 
-            const headers = ['AssetNumber', 'Category', 'AssetName', 'MakeModel', 'SerialNo', 'Status', 'EmployeeName', 'EmployeeCode', 'CUGMobile', 'Department', 'Designation', 'Location', 'Date'];
+            const headers = ['AssetNumber', 'Category', 'AssetName(Desc)', 'MakeModel', 'SerialNo', 'Status', 'EmployeeName', 'EmployeeCode', 'CUGMobile', 'Department', 'Designation', 'Location', 'Notes', 'Date'];
             
             const rows = state.assets.map(asset => 
                 [
@@ -1179,9 +1216,10 @@
                     `"${asset.employeename || ''}"`,
                     `"${asset.employeecode || ''}"`,
                     `"${asset.cugmobile || ''}"`,
-                    `"${asset.department || ''}"`,
+                    `"${asset.department || ''}"`, // NEW
                     `"${asset.designation || ''}"`,
                     `"${asset.location || ''}"`,
+                    `"${asset.notes || ''}"`, // NEW
                     `"${asset.date ? asset.date.split('T')[0] : ''}"`
                 ].join(',')
             );
@@ -1203,9 +1241,6 @@
         
         // --- PRINT HANDOVER FUNCTIONS ---
 
-        /**
-         * Finds the asset data and populates the print modal.
-         */
         function showPrintModal(id) {
             const asset = state.assets.find(a => a.id === id);
             if (!asset) {
@@ -1213,31 +1248,25 @@
                 return;
             }
 
-            // Populate the modal fields
             $('#print-date').textContent = asset.date ? asset.date.split('T')[0] : 'N/A';
             $('#print-employee-name').textContent = asset.employeename || 'N/A';
             $('#print-employee-id').textContent = asset.employeecode || 'N/A';
-            $('#print-department').textContent = asset.department || 'N/A';
-            $('#print-location').textContent = asset.location || 'N/A';
+            $('#print-department').textContent = asset.department || 'N/A'; // UPDATED
+            $('#print-location').textContent = asset.location || 'N/A'; 
 
             $('#print-asset-make').textContent = asset.assetmake || 'N/A';
             $('#print-asset-serial').textContent = asset.assetserial || 'N/A';
             $('#print-asset-tag').textContent = `${asset.assetprefix}${asset.assetnumber}`;
             
-            // Show the modal
+            $('#print-notes').textContent = asset.notes || ''; // NEW
+
             printModal.classList.remove('hidden');
         }
 
-        /**
-         * Hides the print modal.
-         */
         function hidePrintModal() {
             printModal.classList.add('hidden');
         }
         
-        /**
-         * Triggers the browser's print dialog.
-         */
         function printHandoverForm() {
             window.print();
         }
@@ -1343,7 +1372,6 @@
                 if (isEditing) {
                     const index = state.users.findIndex(u => u.id === state.editingUserId);
                     if (index !== -1) {
-                         // Use Object.assign for safety to merge properties
                         state.users[index] = Object.assign({}, state.users[index], savedUser);
                     }
                 } else {
@@ -1398,6 +1426,126 @@
                 console.error('Delete user error:', err);
                 showToast(`Error: ${err.message}`, true);
             }
+        }
+        
+        // --- NEW: BULK IMPORT FUNCTIONS ---
+
+        function showImportModal() {
+            importData.value = '';
+            importModal.classList.remove('hidden');
+        }
+
+        function hideImportModal() {
+            importModal.classList.add('hidden');
+        }
+
+        async function handleProcessImport() {
+            const data = importData.value;
+            if (!data) {
+                showToast('Please paste your CSV data into the box.', true);
+                return;
+            }
+
+            const existingAssetCodes = new Set(state.assets.map(a => `${a.assetprefix}${a.assetnumber}`));
+            const lines = data.split('\n');
+            const header = lines[0].split(',').map(h => h.trim());
+            
+            // Find column indices from header
+            const colIndices = {
+                assetCode: header.indexOf('Asset Code'),
+                assetName: header.indexOf('Asset Name'),
+                makeModel: header.indexOf('Make/Model'),
+                serial: header.indexOf('Serial no.'),
+                status: header.indexOf('Stock Status'),
+                assignedTo: header.indexOf('Assigned to'),
+                designation: header.indexOf('Designation'),
+                location: header.indexOf('Location'),
+                date: header.indexOf('Assigned date'),
+                cug: header.indexOf('CUG Mobile Number'),
+                notes: header.indexOf('Notes') // This is the AssetName/Description in our app
+            };
+            
+            // Check if all required headers are present
+            if (colIndices.assetCode === -1 || colIndices.assetName === -1 || colIndices.notes === -1) {
+                showToast('Error: CSV must contain "Asset Code", "Asset Name", and "Notes" columns.', true);
+                return;
+            }
+
+            let successCount = 0;
+            let skippedCount = 0;
+            let errorCount = 0;
+
+            processImportBtn.disabled = true;
+            processImportBtn.textContent = 'Importing...';
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line) continue;
+
+                // Basic CSV parsing (does not handle commas within quotes)
+                const values = line.split(','); 
+
+                const assetCode = values[colIndices.assetCode] ? values[colIndices.assetCode].trim() : '';
+                if (!assetCode) continue;
+
+                if (existingAssetCodes.has(assetCode)) {
+                    skippedCount++;
+                    continue;
+                }
+                
+                // --- Map CSV to Asset Object ---
+                const lastSlash = assetCode.lastIndexOf('/');
+                const assetPrefix = lastSlash > -1 ? assetCode.substring(0, lastSlash + 1) : 'other';
+                const assetNumber = lastSlash > -1 ? assetCode.substring(lastSlash + 1) : assetCode;
+
+                const csvStatus = values[colIndices.status] ? values[colIndices.status].trim() : 'In Stock';
+                const appStatus = (csvStatus === 'Used' || csvStatus === 'Issued') ? 'Issued' : 'In Stock';
+                
+                const assetData = {
+                    assetPrefix: assetPrefix,
+                    assetNumber: assetNumber,
+                    category: values[colIndices.assetName] ? values[colIndices.assetName].trim() : 'Other',
+                    assetName: values[colIndices.notes] ? values[colIndices.notes].trim() : '', // CSV 'Notes' -> App 'AssetName'
+                    assetMake: values[colIndices.makeModel] ? values[colIndices.makeModel].trim() : '',
+                    assetSerial: values[colIndices.serial] ? values[colIndices.serial].trim() : '',
+                    status: appStatus,
+                    employeeName: appStatus === 'Issued' ? (values[colIndices.assignedTo] ? values[colIndices.assignedTo].trim() : '') : '',
+                    employeeCode: '', // Not in CSV
+                    cugMobile: values[colIndices.cug] ? values[colIndices.cug].trim() : '',
+                    department: '', // NEW Field - Not in CSV
+                    designation: values[colIndices.designation] ? values[colIndices.designation].trim() : '',
+                    location: values[colIndices.location] ? values[colIndices.location].trim() : 'HO',
+                    date: values[colIndices.date] ? values[colIndices.date].trim() : new Date().toISOString().split('T')[0],
+                    notes: '' // NEW Field - Not in CSV
+                };
+                
+                try {
+                    const response = await fetch(`${API_URL}/api/assets`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(assetData)
+                    });
+
+                    if (response.ok) {
+                        const savedAsset = await response.json();
+                        state.assets.push(savedAsset);
+                        existingAssetCodes.add(assetCode); // Add to set to prevent duplicates in same run
+                        successCount++;
+                    } else {
+                        errorCount++;
+                    }
+                } catch (err) {
+                    errorCount++;
+                    console.error('Import error for asset:', assetCode, err);
+                }
+            }
+            
+            processImportBtn.disabled = false;
+            processImportBtn.textContent = 'Process Import';
+            hideImportModal();
+            
+            showToast(`Import complete: ${successCount} added, ${skippedCount} skipped, ${errorCount} failed.`, errorCount > 0);
+            renderUI();
         }
 
         // --- INITIALIZATION ---
