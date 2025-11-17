@@ -574,6 +574,48 @@
             assetFilter: '',
         };
 
+// ---- Auth helpers (JWT) ----
+function saveAuth(token, user) {
+    try {
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('currentUser', JSON.stringify(user));
+    } catch (e) { console.warn('localStorage not available', e); }
+    state.authToken = token;
+    state.currentUser = user;
+}
+
+function clearAuth() {
+    try {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+    } catch (e) {}
+    state.authToken = null;
+    state.currentUser = null;
+}
+
+async function authFetch(url, opts = {}) {
+    opts = opts || {};
+    opts.headers = opts.headers || {};
+    if (!(opts.body instanceof FormData) && !opts.headers['Content-Type']) {
+        opts.headers['Content-Type'] = 'application/json';
+    }
+    const token = state.authToken || localStorage.getItem('authToken');
+    if (token) {
+        opts.headers['Authorization'] = 'Bearer ' + token;
+        state.authToken = token;
+    }
+    const res = await fetch(url, opts);
+    if (res.status === 401) {
+        clearAuth();
+        renderUI();
+        throw new Error('Unauthorized');
+    }
+    return res;
+}
+// ---- end auth helpers ----
+
+
+
         // --- DOM ELEMENT SELECTORS ---
         const $ = (selector) => document.querySelector(selector);
         
@@ -646,197 +688,7 @@
             searchInput.addEventListener('input', (e) => {
                 state.assetFilter = e.target.value.toLowerCase();
                 renderAssetTable();
-            });
-            assetStatus.addEventListener('change', (e) => toggleIssuedFields(e.target.value));
-            assetPrefixSelect.addEventListener('change', (e) => togglePrefixOther(e.target.value));
-            
-            $('#employee-code').addEventListener('input', (e) => {
-                e.target.value = e.target.value.replace(/[^0-9]/g, '');
-            });
-
-            // Admin Listeners
-            userManageBtn.addEventListener('click', showUserModal);
-            closeUserModalBtn.addEventListener('click', hideUserModal);
-            userForm.addEventListener('submit', handleUserFormSubmit);
-            cancelUserEditBtn.addEventListener('click', resetUserForm);
-
-            // Print Modal Listeners
-            cancelPrintBtn.addEventListener('click', hidePrintModal);
-            printHandoverBtn.addEventListener('click', printHandoverForm);
-
-            // Dynamic listeners for table buttons (event delegation)
-            assetTableBody.addEventListener('click', (e) => {
-                const editBtn = e.target.closest('.edit-asset-btn');
-                const deleteBtn = e.target.closest('.delete-asset-btn');
-                const printBtn = e.target.closest('.print-asset-btn');
-                
-                if (editBtn) {
-                    const id = parseInt(editBtn.dataset.id);
-                    handleEditAsset(id);
-                }
-                if (deleteBtn) {
-                    const id = parseInt(deleteBtn.dataset.id);
-                    handleDeleteAsset(id);
-                }
-                if (printBtn) {
-                    const id = parseInt(printBtn.dataset.id);
-                    showPrintModal(id);
-                }
-            });
-            
-            userListContainer.addEventListener('click', (e) => {
-                const editBtn = e.target.closest('.edit-user-btn');
-                const deleteBtn = e.target.closest('.delete-user-btn');
-                
-                if (editBtn) {
-                    const id = parseInt(editBtn.dataset.id);
-                    handleEditUser(id);
-                }
-                if (deleteBtn) {
-                    const id = parseInt(deleteBtn.dataset.id);
-                    handleDeleteUser(id);
-                }
-            });
-        }
-
-        /**
-         * Controls which view (Login or Main App) is visible.
-         */
-        function renderUI() {
-            if (state.currentUser) {
-                // User is logged in
-                loginView.classList.add('hidden');
-                mainView.classList.remove('hidden');
-                mainView.classList.add('flex', 'flex-col');
-                welcomeUser.textContent = `Welcome, ${state.currentUser.username}!`;
-                
-                if (state.currentUser.role === 'admin') {
-                    document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-                } else {
-                    document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
-                }
-                renderDashboardStats();
-                renderAssetTable();
-            } else {
-                // User is logged out
-                loginView.classList.remove('hidden');
-                mainView.classList.add('hidden');
-                mainView.classList.remove('flex', 'flex-col');
-                loginError.classList.add('hidden');
-                loginError.textContent = '';
-                loginForm.reset();
             }
-        }
-        
-        function showToast(message, isError = false) {
-            toastMessage.textContent = message;
-            toast.classList.remove('hidden', 'bg-green-500', 'bg-red-500');
-            toast.classList.add(isError ? 'bg-red-500' : 'bg-green-500');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
-        }
-
-        function setLoginLoading(isLoading) {
-            loginButton.disabled = isLoading;
-            loginButtonText.textContent = isLoading ? 'Signing In...' : 'Sign In';
-            loginButton.classList.toggle('opacity-75', isLoading);
-        }
-
-        function setMainLoading(isLoading) {
-             if (isLoading) {
-                mainLoading.classList.remove('hidden');
-                mainLoading.classList.add('flex');
-                contentWrapper.classList.add('hidden');
-            } else {
-                mainLoading.classList.add('hidden');
-                mainLoading.classList.remove('flex');
-                contentWrapper.classList.remove('hidden');
-            }
-        }
-
-        // --- AUTHENTICATION & DATA LOADING ---
-
-        
-async function checkPersistedLogin() {
-    const persistedUser = localStorage.getItem('currentUser');
-    const persistedToken = localStorage.getItem('authToken');
-    if (persistedUser && persistedToken) {
-        try {
-            state.currentUser = JSON.parse(persistedUser);
-            state.authToken = persistedToken;
-            setMainLoading(true);
-            await loadInitialData();
-            renderUI();
-            setMainLoading(false);
-            showToast(`Welcome back, ${state.currentUser.username}!`);
-        } catch (e) {
-            console.error('Failed persisted login load:', e);
-            clearAuth();
-            renderUI();
-        }
-    } else {
-        renderUI();
-    }
-}
- catch (e) {
-                    localStorage.removeItem('currentUser');
-                    state.currentUser = null;
-                    renderUI();
-                }
-            } else {
-                renderUI();
-            }
-        }
-
-        
-async function handleLogin(e) {
-    e.preventDefault();
-    setLoginLoading(true);
-    loginError.classList.add('hidden');
-
-    const username = $('#username').value;
-    const password = $('#password').value;
-
-    try {
-        const response = await fetch(`${API_URL}/api/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
-
-        if (!response.ok) {
-            const err = await response.json().catch(() => ({ error: 'Login failed' }));
-            loginError.textContent = err.error || 'Invalid username or password.';
-            loginError.classList.remove('hidden');
-            return;
-        }
-
-        const body = await response.json(); // expected { token, user }
-        saveAuth(body.token, body.user);
-
-        setMainLoading(true);
-        try {
-            await loadInitialData();
-            renderUI();
-            showToast(`Welcome, ${body.user.username}!`);
-        } catch (loadErr) {
-            console.error('Failed to load initial data after login:', loadErr);
-            clearAuth();
-            loginError.textContent = 'Login succeeded but failed to load app data. Try again.';
-            loginError.classList.remove('hidden');
-            renderUI();
-        } finally {
-            setMainLoading(false);
-        }
-    } catch (err) {
-        console.error('Login fetch error:', err);
-        loginError.textContent = 'Cannot connect to server. Is it running?';
-        loginError.classList.remove('hidden');
-    } finally {
-        setLoginLoading(false);
-    }
-}
 );
                 
                 if (response.ok) {
@@ -875,12 +727,66 @@ async function handleLogin(e) {
             }
         }
 
-        async function loadInitialData() {
+        
+async function handleLogin(e) {
+    e.preventDefault();
+    setLoginLoading(true);
+    loginError.classList.add('hidden');
+
+    const username = $('#username').value;
+    const password = $('#password').value;
+
+    try {
+        const response = await fetch(`${API_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({ error: 'Login failed' }));
+            loginError.textContent = err.error || 'Invalid username or password.';
+            loginError.classList.remove('hidden');
+            return;
+        }
+
+        const body = await response.json(); // expected { token, user }
+        if (!body || !body.token || !body.user) {
+            loginError.textContent = 'Invalid login response from server.';
+            loginError.classList.remove('hidden');
+            return;
+        }
+
+        saveAuth(body.token, body.user);
+
+        setMainLoading(true);
+        try {
+            await loadInitialData();
+            renderUI();
+            showToast(`Welcome, ${body.user.username}!`);
+        } catch (loadErr) {
+            console.error('Failed to load initial data after login:', loadErr);
+            clearAuth();
+            loginError.textContent = 'Login succeeded but failed to load app data. Try again.';
+            loginError.classList.remove('hidden');
+            renderUI();
+        } finally {
+            setMainLoading(false);
+        }
+    } catch (err) {
+        console.error('Login fetch error:', err);
+        loginError.textContent = 'Cannot connect to server. Is it running?';
+        loginError.classList.remove('hidden');
+    } finally {
+        setLoginLoading(false);
+    }
+}
+
+
+async function loadInitialData() {
             try {
                 const [assetsRes, usersRes] = await Promise.all([
-                    authFetch(`${API_URL}/api/assets`),
-                    state.currentUser && state.currentUser.role === 'admin' ? authFetch(`${API_URL}/api/users`) : Promise.resolve(null)
-                ]);
+                    authFetch(`${API_URL}/api/assets`);
 
                 if (!assetsRes.ok) throw new Error('Failed to load assets');
                 
@@ -1453,8 +1359,7 @@ async function handleLogin(e) {
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', init);
-
-    </script>
+</script>
 </body>
 </html>
 
