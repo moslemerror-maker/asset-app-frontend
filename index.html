@@ -743,6 +743,21 @@ async function handleLogin(e) {
             body: JSON.stringify({ username, password })
         });
 
+async function handleLogin(e) {
+    e.preventDefault();
+    setLoginLoading(true);
+    loginError.classList.add('hidden');
+
+    const username = $('#username').value;
+    const password = $('#password').value;
+
+    try {
+        const response = await fetch(`${API_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
         if (!response.ok) {
             const err = await response.json().catch(() => ({ error: 'Login failed' }));
             loginError.textContent = err.error || 'Invalid username or password.';
