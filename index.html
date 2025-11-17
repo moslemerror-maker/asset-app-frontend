@@ -37,14 +37,6 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* --- Visual upgrades for management-friendly look --- */
-        body { background: linear-gradient(135deg, #f3f4f6 0%, #eef2ff 50%, #fff 100%); }
-        .login-gradient { background: linear-gradient(180deg, rgba(79,70,229,0.06), rgba(99,102,241,0.04)); border: 1px solid rgba(99,102,241,0.08); }
-        .brand-tag { color: #4f46e5; font-weight: 700; }
-        .fancy-btn { transition: transform 0.15s ease, box-shadow 0.15s ease; }
-        .fancy-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(79,70,229,0.12); }
-    
-
         /* * ===============================================
          * NEW AGGRESSIVE PRINT STYLES (To fix blank page)
          * ===============================================
@@ -574,48 +566,6 @@
             assetFilter: '',
         };
 
-// ---- Auth helpers (JWT) ----
-function saveAuth(token, user) {
-    try {
-        localStorage.setItem('authToken', token);
-        localStorage.setItem('currentUser', JSON.stringify(user));
-    } catch (e) { console.warn('localStorage not available', e); }
-    state.authToken = token;
-    state.currentUser = user;
-}
-
-function clearAuth() {
-    try {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('currentUser');
-    } catch (e) {}
-    state.authToken = null;
-    state.currentUser = null;
-}
-
-async function authFetch(url, opts = {}) {
-    opts = opts || {};
-    opts.headers = opts.headers || {};
-    if (!(opts.body instanceof FormData) && !opts.headers['Content-Type']) {
-        opts.headers['Content-Type'] = 'application/json';
-    }
-    const token = state.authToken || localStorage.getItem('authToken');
-    if (token) {
-        opts.headers['Authorization'] = 'Bearer ' + token;
-        state.authToken = token;
-    }
-    const res = await fetch(url, opts);
-    if (res.status === 401) {
-        clearAuth();
-        renderUI();
-        throw new Error('Unauthorized');
-    }
-    return res;
-}
-// ---- end auth helpers ----
-
-
-
         // --- DOM ELEMENT SELECTORS ---
         const $ = (selector) => document.querySelector(selector);
         
@@ -688,11 +638,158 @@ async function authFetch(url, opts = {}) {
             searchInput.addEventListener('input', (e) => {
                 state.assetFilter = e.target.value.toLowerCase();
                 renderAssetTable();
+            });
+            assetStatus.addEventListener('change', (e) => toggleIssuedFields(e.target.value));
+            assetPrefixSelect.addEventListener('change', (e) => togglePrefixOther(e.target.value));
+            
+            $('#employee-code').addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            });
+
+            // Admin Listeners
+            userManageBtn.addEventListener('click', showUserModal);
+            closeUserModalBtn.addEventListener('click', hideUserModal);
+            userForm.addEventListener('submit', handleUserFormSubmit);
+            cancelUserEditBtn.addEventListener('click', resetUserForm);
+
+            // Print Modal Listeners
+            cancelPrintBtn.addEventListener('click', hidePrintModal);
+            printHandoverBtn.addEventListener('click', printHandoverForm);
+
+            // Dynamic listeners for table buttons (event delegation)
+            assetTableBody.addEventListener('click', (e) => {
+                const editBtn = e.target.closest('.edit-asset-btn');
+                const deleteBtn = e.target.closest('.delete-asset-btn');
+                const printBtn = e.target.closest('.print-asset-btn');
+                
+                if (editBtn) {
+                    const id = parseInt(editBtn.dataset.id);
+                    handleEditAsset(id);
+                }
+                if (deleteBtn) {
+                    const id = parseInt(deleteBtn.dataset.id);
+                    handleDeleteAsset(id);
+                }
+                if (printBtn) {
+                    const id = parseInt(printBtn.dataset.id);
+                    showPrintModal(id);
+                }
+            });
+            
+            userListContainer.addEventListener('click', (e) => {
+                const editBtn = e.target.closest('.edit-user-btn');
+                const deleteBtn = e.target.closest('.delete-user-btn');
+                
+                if (editBtn) {
+                    const id = parseInt(editBtn.dataset.id);
+                    handleEditUser(id);
+                }
+                if (deleteBtn) {
+                    const id = parseInt(deleteBtn.dataset.id);
+                    handleDeleteUser(id);
+                }
+            });
+        }
+
+        /**
+         * Controls which view (Login or Main App) is visible.
+         */
+        function renderUI() {
+            if (state.currentUser) {
+                // User is logged in
+                loginView.classList.add('hidden');
+                mainView.classList.remove('hidden');
+                mainView.classList.add('flex', 'flex-col');
+                welcomeUser.textContent = `Welcome, ${state.currentUser.username}!`;
+                
+                if (state.currentUser.role === 'admin') {
+                    document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+                } else {
+                    document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+                }
+                renderDashboardStats();
+                renderAssetTable();
+            } else {
+                // User is logged out
+                loginView.classList.remove('hidden');
+                mainView.classList.add('hidden');
+                mainView.classList.remove('flex', 'flex-col');
+                loginError.classList.add('hidden');
+                loginError.textContent = '';
+                loginForm.reset();
             }
-);
+        }
+        
+        function showToast(message, isError = false) {
+            toastMessage.textContent = message;
+            toast.classList.remove('hidden', 'bg-green-500', 'bg-red-500');
+            toast.classList.add(isError ? 'bg-red-500' : 'bg-green-500');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        function setLoginLoading(isLoading) {
+            loginButton.disabled = isLoading;
+            loginButtonText.textContent = isLoading ? 'Signing In...' : 'Sign In';
+            loginButton.classList.toggle('opacity-75', isLoading);
+        }
+
+        function setMainLoading(isLoading) {
+             if (isLoading) {
+                mainLoading.classList.remove('hidden');
+                mainLoading.classList.add('flex');
+                contentWrapper.classList.add('hidden');
+            } else {
+                mainLoading.classList.add('hidden');
+                mainLoading.classList.remove('flex');
+                contentWrapper.classList.remove('hidden');
+            }
+        }
+
+        // --- AUTHENTICATION & DATA LOADING ---
+
+        async function checkPersistedLogin() {
+            const persistedUser = localStorage.getItem('currentUser');
+            if (persistedUser) {
+                try {
+                    state.currentUser = JSON.parse(persistedUser);
+                    setMainLoading(true);
+                    await loadInitialData();
+                    renderUI();
+                    setMainLoading(false);
+                    showToast(`Welcome back, ${state.currentUser.username}!`);
+                } catch (e) {
+                    localStorage.removeItem('currentUser');
+                    state.currentUser = null;
+                    renderUI();
+                }
+            } else {
+                renderUI();
+            }
+        }
+
+        // CORRECTED handleLogin function
+        async function handleLogin(e) {
+            e.preventDefault();
+            setLoginLoading(true);
+            loginError.classList.add('hidden');
+            
+            const username = $('#username').value;
+            const password = $('#password').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
                 
                 if (response.ok) {
-                    const user = await response.json();
+                    // This is the response server.js is sending: { id, username, role }
+                    const user = await response.json(); 
+                    
+                    // Save user to state and localStorage
                     state.currentUser = user;
                     localStorage.setItem('currentUser', JSON.stringify(user));
                     
@@ -704,7 +801,6 @@ async function authFetch(url, opts = {}) {
                         showToast(`Welcome, ${user.username}!`);
                     } catch (loadErr) {
                         console.error('Failed to load initial data after login:', loadErr);
-                        // keep user logged out on failure to load data
                         localStorage.removeItem('currentUser');
                         state.currentUser = null;
                         renderUI();
@@ -718,101 +814,43 @@ async function authFetch(url, opts = {}) {
                     loginError.textContent = err.error || 'Invalid username or password.';
                     loginError.classList.remove('hidden');
                 }
-            }
-
-
-async function handleLogin(e) {
-    e && e.preventDefault();
-    setLoginLoading && setLoginLoading(true);
-    loginError && loginError.classList.add('hidden');
-
-    const username = ($('#username') && $('#username').value) || '';
-    const password = ($('#password') && $('#password').value) || '';
-
-    try {
-        const response = await fetch(`${API_URL}/api/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
-
-        if (!response.ok) {
-            const err = await response.json().catch(() => ({ error: 'Login failed' }));
-            if (loginError) {
-                loginError.textContent = err.error || 'Invalid username or password.';
+            } catch (err) {
+                console.error('Login fetch error:', err);
+                loginError.textContent = 'Cannot connect to server. Is it running?';
                 loginError.classList.remove('hidden');
+            } finally {
+                setLoginLoading(false);
             }
-            return;
         }
 
-        const body = await response.json(); // expected { token, user }
-        if (!body || !body.token || !body.user) {
-            if (loginError) {
-                loginError.textContent = 'Invalid login response from server.';
-                loginError.classList.remove('hidden');
+        // CORRECTED loadInitialData (uses standard fetch)
+        async function loadInitialData() {
+            try {
+                const [assetsRes, usersRes] = await Promise.all([
+                    fetch(`${API_URL}/api/assets`),
+                    (state.currentUser && state.currentUser.role === 'admin') ? fetch(`${API_URL}/api/users`) : Promise.resolve(null)
+                ]);
+
+                if (!assetsRes.ok) throw new Error('Failed to load assets');
+                
+                state.assets = await assetsRes.json();
+                
+                if (usersRes && usersRes.ok) {
+                    state.users = await usersRes.json();
+                } else {
+                    state.users = [];
+                }
+                
+                state.assets.sort((a, b) => a.id - b.id);
+                state.users.sort((a, b) => a.id - b.id);
+
+            } catch (err) {
+                console.error('Data loading error:', err);
+                showToast('Error loading data from database.', true);
+                // Don't log out, just throw the error so login can handle it
+                throw err;
             }
-            return;
         }
-
-        saveAuth(body.token, body.user);
-
-        setMainLoading && setMainLoading(true);
-        try {
-            await loadInitialData();
-            renderUI && renderUI();
-            showToast && showToast(`Welcome, ${body.user.username || 'User'}!`);
-        } catch (loadErr) {
-            console.error('Failed to load initial data after login:', loadErr);
-            clearAuth();
-            if (loginError) {
-                loginError.textContent = 'Login succeeded but failed to load app data. Try again.';
-                loginError.classList.remove('hidden');
-            }
-            renderUI && renderUI();
-        } finally {
-            setMainLoading && setMainLoading(false);
-        }
-    } catch (err) {
-        console.error('Login fetch error:', err);
-        if (loginError) {
-            loginError.textContent = 'Cannot connect to server. Is it running?';
-            loginError.classList.remove('hidden');
-        }
-    } finally {
-        setLoginLoading && setLoginLoading(false);
-    }
-}
-
-
-
-
-async function loadInitialData() {
-    try {
-        const assetsRes = await authFetch(`${API_URL}/api/assets`);
-        if (!assetsRes.ok) throw new Error('Failed to load assets');
-        state.assets = await assetsRes.json();
-
-        // Load users only for admins
-        if (state.currentUser && state.currentUser.role === 'admin') {
-            const usersRes = await authFetch(`${API_URL}/api/users`);
-            if (usersRes && usersRes.ok) {
-                state.users = await usersRes.json();
-            } else {
-                state.users = [];
-            }
-        } else {
-            state.users = [];
-        }
-
-        state.assets.sort((a, b) => (a.id || 0) - (b.id || 0));
-        state.users.sort((a, b) => (a.id || 0) - (b.id || 0));
-    } catch (err) {
-        console.error('Data loading error:', err);
-        showToast && showToast('Error loading data from database.', true);
-        throw err;
-    }
-}
-
 
         function handleLogout() {
             const username = state.currentUser ? state.currentUser.username : 'User';
@@ -1103,7 +1141,7 @@ async function loadInitialData() {
             }
 
             try {
-                const response = await authFetch(`${API_URL}/api/assets/${id}`, {
+                const response = await fetch(`${API_URL}/api/assets/${id}`, {
                     method: 'DELETE'
                 });
 
@@ -1305,11 +1343,11 @@ async function loadInitialData() {
                 if (isEditing) {
                     const index = state.users.findIndex(u => u.id === state.editingUserId);
                     if (index !== -1) {
-                        state.users[index] = { ...state.users[index], ...savedUser };
+                         // Use Object.assign for safety to merge properties
+                        state.users[index] = Object.assign({}, state.users[index], savedUser);
                     }
                 } else {
                     state.users.push(savedUser);
-                    // Data.json()... // REMOVED THIS LINE
                 }
                 state.users.sort((a, b) => a.id - b.id);
                 
@@ -1342,7 +1380,7 @@ async function loadInitialData() {
         
         async function handleDeleteUser(id) {
             try {
-                const response = await authFetch(`${API_URL}/api/users/${id}`, {
+                const response = await fetch(`${API_URL}/api/users/${id}`, {
                     method: 'DELETE'
                 });
 
@@ -1364,7 +1402,7 @@ async function loadInitialData() {
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', init);
-</script>
+
+    </script>
 </body>
 </html>
-
