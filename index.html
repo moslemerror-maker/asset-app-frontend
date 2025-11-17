@@ -87,12 +87,11 @@
 </head>
 <body class="bg-gray-100 font-sans">
 
-    <!-- Main Application Container --><div id="app" class="flex flex-col min-h-screen">
+    <div id="app" class="flex flex-col min-h-screen">
 
-        <!-- Login View --><div id="login-view" class="flex-grow flex items-center justify-center p-6">
+        <div id="login-view" class="flex-grow flex items-center justify-center p-6">
             <div class="bg-white p-8 md:p-10 rounded-xl shadow-2xl w-full max-w-md">
                 <div class="text-center mb-8">
-                    <!-- LOGO on Login Screen -->
                     <img src="logo.png" alt="Best Cement Logo" class="w-24 h-24 mx-auto mb-4">
                     <h1 class="text-3xl font-bold text-gray-800 mt-4">Best Cement IT Asset Management App</h1>
                     <p class="text-gray-500">Please sign in to continue</p>
@@ -129,13 +128,12 @@
             </div>
         </div>
 
-        <!-- Main App View (Hidden by default) --><div id="main-view" class="hidden flex-grow flex flex-col">
+        <div id="main-view" class="hidden flex-grow flex flex-col">
             
-            <!-- Header/Navbar --><header class="bg-white shadow-md">
+            <header class="bg-white shadow-md">
                 <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center h-16">
                         <div class="flex items-center">
-                            <!-- LOGO in Header -->
                             <img src="logo.png" alt="Best Cement Logo" class="w-10 h-10">
                             <span class="text-xl font-bold text-gray-800 ml-3">Best Cement IT Asset Portal</span>
                         </div>
@@ -152,7 +150,7 @@
                 </nav>
             </header>
 
-            <!-- Main Content Area --><main id="main-content" class="flex-grow container mx-auto p-4 sm:p-6 lg:p-8 overflow-y-auto">
+            <main id="main-content" class="flex-grow container mx-auto p-4 sm:p-6 lg:p-8 overflow-y-auto">
                 
                 <div id="main-loading" class="hidden justify-center items-center py-20">
                     <div class="spinner"></div>
@@ -162,14 +160,13 @@
                     <div class="mb-6">
                         <h2 class="text-2xl font-bold text-gray-800 mb-4">Asset Overview</h2>
                         <div id="dashboard-stats" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                            <!-- Stats cards will be injected here by JS --></div>
+                            </div>
                     </div>
 
                     <div class="bg-white p-6 rounded-xl shadow-lg">
                         <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                             <h2 class="text-2xl font-bold text-gray-800">Asset Dashboard</h2>
                             <div class="flex items-center space-x-3">
-                                <!-- NEW: Admin Bulk Import Button -->
                                 <button id="bulk-import-btn" class="admin-only hidden flex items-center px-4 py-2 border border-orange-600 rounded-lg text-sm font-medium text-orange-700 bg-white hover:bg-orange-50 shadow-sm transition duration-200">
                                     <i class="fas fa-upload mr-2"></i>Admin Bulk Import
                                 </button>
@@ -204,16 +201,16 @@
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee Name</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee Code</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CUG Mobile</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th> <!-- NEW -->
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Designation</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th> <!-- NEW -->
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Added</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="asset-table-body" class="bg-white divide-y divide-gray-200">
-                                    <!-- Rows will be injected by JS --></tbody>
+                                    </tbody>
                             </table>
                             <div id="no-assets-msg" class="text-center py-10 text-gray-500 hidden">
                                 <i class="fas fa-box-open text-4xl mb-4"></i>
@@ -224,13 +221,13 @@
                 </div>
             </main>
             
-            <!-- Footer --><footer class="text-center py-4 text-sm text-gray-500 bg-gray-200">
+            <footer class="text-center py-4 text-sm text-gray-500 bg-gray-200">
                 This webapp is developed by IT Dept, Best Cement
             </footer>
         </div>
     </div>
 
-    <!-- Asset Modal (Add/Edit) --><div id="asset-modal" class="hidden fixed z-10 inset-0 overflow-y-auto">
+    <div id="asset-modal" class="hidden fixed z-10 inset-0 overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
@@ -314,7 +311,6 @@
                                         <input type="tel" id="cug-mobile" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm">
                                     </div>
                                     
-                                    <!-- NEW: Department Field -->
                                     <div>
                                         <label for="department" class="block text-sm font-medium text-gray-700">Department</label>
                                         <input type="text" id="department" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm" placeholder="e.g., IT, Sales, HR">
@@ -339,7 +335,6 @@
                                         <input type="date" id="date" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm" required>
                                     </div>
 
-                                    <!-- NEW: Notes Field -->
                                     <div>
                                         <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
                                         <textarea id="notes" class="mt-1 form-input w-full border border-gray-300 rounded-md shadow-sm" rows="3" placeholder="Add any extra notes here..."></textarea>
@@ -362,7 +357,7 @@
         </div>
     </div>
 
-    <!-- User Management Modal (Admin Only) --><div id="user-modal" class="hidden fixed z-20 inset-0 overflow-y-auto">
+    <div id="user-modal" class="hidden fixed z-20 inset-0 overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
@@ -409,7 +404,7 @@
                                 <div class="w-full md:w-1/2">
                                     <h4 class="font-semibold text-gray-700">Existing Users</h4>
                                     <div id="user-list-container" class="mt-2 space-y-2 max-h-60 overflow-y-auto pr-2">
-                                        <!-- User list items injected by JS --></div>
+                                        </div>
                                 </div>
                             </div>
                         </div>
@@ -424,18 +419,14 @@
         </div>
     </div>
 
-    <!-- Print Handover Modal --><div id="print-modal" class="hidden fixed z-30 inset-0 overflow-y-auto">
+    <div id="print-modal" class="hidden fixed z-30 inset-0 overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <!-- Background overlay -->
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
             
-            <!-- Modal panel -->
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             <div id="print-modal-content" class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
                 
-                <!-- This is the printable area, styled like your PDF -->
                 <div id="printable-handover-form" class="p-8 print-no-shadow">
-                    <!-- Header -->
                     <div class="flex justify-between items-start border-b-2 border-gray-200 pb-4">
                         <div>
                             <img src="logo.png" alt="Best Cement Logo" class="h-16">
@@ -447,7 +438,6 @@
                         </div>
                     </div>
                     
-                    <!-- Address & Date -->
                     <div class="flex justify-between items-start mt-6 text-sm">
                         <div>
                             <p class="font-bold">Best Cement</p>
@@ -459,7 +449,6 @@
                         </div>
                     </div>
 
-                    <!-- Employee Details -->
                     <div class="mt-8 border border-gray-300 rounded-lg p-4 print-avoid-break">
                         <div class="grid grid-cols-2 gap-4">
                             <div>
@@ -472,8 +461,7 @@
                             </div>
                             <div>
                                 <label class="text-sm text-gray-500">Department</label>
-                                <p id="print-department" class="font-semibold text-gray-900"></p> <!-- UPDATED -->
-                            </div>
+                                <p id="print-department" class="font-semibold text-gray-900"></p> </div>
                             <div>
                                 <label class="text-sm text-gray-500">Location</label>
                                 <p id="print-location" class="font-semibold text-gray-900"></p>
@@ -481,7 +469,6 @@
                         </div>
                     </div>
 
-                    <!-- Asset Table -->
                     <div class="mt-6 print-avoid-break">
                         <h4 class="text-lg font-semibold text-gray-800 mb-2">Asset Details</h4>
                         <table class="min-w-full border border-gray-300">
@@ -500,20 +487,16 @@
                                     <td id="print-asset-serial" class="px-4 py-2 text-sm text-gray-800 border-r border-gray-300"></td>
                                     <td id="print-asset-tag" class="px-4 py-2 text-sm text-gray-800"></td>
                                 </tr>
-                                <!-- Add more rows here if needed, e.g., for multiple assets -->
-                            </tbody>
+                                </tbody>
                         </table>
                     </div>
 
-                    <!-- Notes -->
                     <div class="mt-6 print-avoid-break">
                         <label class="text-sm text-gray-500">Notes:</label>
                         <div id="print-notes" class="w-full h-20 border border-gray-300 rounded-lg p-2 text-sm text-gray-600">
-                            <!-- This will be populated from the new Notes field -->
-                        </div>
+                            </div>
                     </div>
 
-                    <!-- Signatures -->
                     <div class="mt-20 flex justify-between text-center print-avoid-break">
                         <div>
                             <p class="border-t border-gray-400 pt-2 px-12 text-sm font-medium text-gray-800">User Signature</p>
@@ -524,7 +507,6 @@
                     </div>
                 </div>
 
-                <!-- Modal Buttons (Hidden on Print) -->
                 <div id="print-modal-buttons" class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                     <button type="button" id="print-handover-btn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm">
                         <i class="fas fa-print mr-2"></i>Print
@@ -538,7 +520,7 @@
         </div>
     </div>
 
-    <!-- NEW: Bulk Import Modal --><div id="import-modal" class="hidden fixed z-20 inset-0 overflow-y-auto">
+    <div id="import-modal" class="hidden fixed z-20 inset-0 overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
@@ -552,11 +534,11 @@
                             <h3 class="text-lg leading-6 font-medium text-gray-900">Admin Bulk Import</h3>
                             <div class="mt-2">
                                 <p class="text-sm text-gray-500 mb-2">
-                                    Copy all data from your Excel/CSV file (including the header row) and paste it into the box below.
+                                    Copy all data from your Excel/CSV file (using the correct template) and paste it into the box below.
                                 </p>
-                                <textarea id="import-data" class="w-full h-48 form-textarea border border-gray-300 rounded-md shadow-sm font-mono text-xs" placeholder="Sl No,Asset Code,Asset Name,Make/Model..."></textarea>
+                                <textarea id="import-data" class="w-full h-48 form-textarea border border-gray-300 rounded-md shadow-sm font-mono text-xs" placeholder="AssetNumber,Category,AssetName/Description,Make/Model..."></textarea>
                                 <p class="text-xs text-gray-400 mt-1">
-                                    The import will automatically skip any assets where the 'Asset Code' already exists in the database.
+                                    The import will automatically skip any assets where the 'AssetNumber' (e.g., JUD/IT ASSET/001) already exists in the database.
                                 </p>
                             </div>
                         </div>
@@ -575,7 +557,7 @@
     </div>
 
 
-    <!-- Custom Alert/Toast --><div id="toast" class="hidden fixed top-5 right-5 z-30 px-5 py-3 rounded-lg shadow-xl text-white">
+    <div id="toast" class="hidden fixed top-5 right-5 z-30 px-5 py-3 rounded-lg shadow-xl text-white">
         <span id="toast-message"></span>
     </div>
 
@@ -996,10 +978,10 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.employeename || 'N/A'}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.employeecode || 'N/A'}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.cugmobile || ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.department || ''}</td> <!-- NEW -->
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.department || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.designation || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${asset.location || ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${(asset.notes || '').substring(0, 20)}...</td> <!-- NEW -->
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${(asset.notes || '').substring(0, 20)}...</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${displayDate}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                         <button class="edit-asset-btn text-blue-600 hover:text-blue-900" data-id="${asset.id}" title="Edit">
@@ -1021,7 +1003,7 @@
         }
 
         function toggleIssuedFields(status) {
-            if (status === 'Issued' || status === 'Used') { // Support for 'Used' status from CSV
+            if (status === 'Issued' || status === 'Used') {
                 issuedToFields.classList.remove('hidden');
                 employeeName.required = true;
             } else {
@@ -1203,7 +1185,7 @@
                 return;
             }
 
-            const headers = ['AssetNumber', 'Category', 'AssetName(Desc)', 'MakeModel', 'SerialNo', 'Status', 'EmployeeName', 'EmployeeCode', 'CUGMobile', 'Department', 'Designation', 'Location', 'Notes', 'Date'];
+            const headers = ['AssetNumber', 'Category', 'AssetName/Description', 'Make/Model', 'SerialNo', 'Status', 'EmployeeName', 'EmployeeCode', 'CUGMobile', 'Department', 'Designation', 'Location', 'Notes', 'Date'];
             
             const rows = state.assets.map(asset => 
                 [
@@ -1430,6 +1412,34 @@
         
         // --- NEW: BULK IMPORT FUNCTIONS ---
 
+        /**
+         * A simple CSV parser that handles quotes.
+         */
+        function parseCSV(csvData) {
+            const rows = [];
+            const lines = csvData.split('\n');
+            for (const line of lines) {
+                if (!line.trim()) continue;
+                const row = [];
+                let currentField = '';
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        row.push(currentField.trim());
+                        currentField = '';
+                    } else {
+                        currentField += char;
+                    }
+                }
+                row.push(currentField.trim());
+                rows.push(row);
+            }
+            return rows;
+        }
+
         function showImportModal() {
             importData.value = '';
             importModal.classList.remove('hidden');
@@ -1447,27 +1457,33 @@
             }
 
             const existingAssetCodes = new Set(state.assets.map(a => `${a.assetprefix}${a.assetnumber}`));
-            const lines = data.split('\n');
-            const header = lines[0].split(',').map(h => h.trim());
             
-            // Find column indices from header
-            const colIndices = {
-                assetCode: header.indexOf('Asset Code'),
-                assetName: header.indexOf('Asset Name'),
-                makeModel: header.indexOf('Make/Model'),
-                serial: header.indexOf('Serial no.'),
-                status: header.indexOf('Stock Status'),
-                assignedTo: header.indexOf('Assigned to'),
-                designation: header.indexOf('Designation'),
-                location: header.indexOf('Location'),
-                date: header.indexOf('Assigned date'),
-                cug: header.indexOf('CUG Mobile Number'),
-                notes: header.indexOf('Notes') // This is the AssetName/Description in our app
-            };
+            let rows;
+            try {
+                rows = parseCSV(data);
+            } catch(e) {
+                showToast('Error parsing CSV. Please check the format.', true);
+                return;
+            }
+
+            const header = rows[0];
             
+            // Define the exact headers we expect from the template
+            const expectedHeaders = [
+                'AssetNumber', 'Category', 'AssetName/Description', 'Make/Model', 'Serial No', 'Status',
+                'Employee Name', 'Employee Code', 'CUG Mobile', 'Department', 'Designation', 'Location', 'Date', 'Notes'
+            ];
+            
+            // Find column indices
+            const colIndices = {};
+            expectedHeaders.forEach(h => {
+                const index = header.findIndex(headerCell => headerCell.toLowerCase() === h.toLowerCase());
+                colIndices[h] = index;
+            });
+
             // Check if all required headers are present
-            if (colIndices.assetCode === -1 || colIndices.assetName === -1 || colIndices.notes === -1) {
-                showToast('Error: CSV must contain "Asset Code", "Asset Name", and "Notes" columns.', true);
+            if (colIndices['AssetNumber'] === -1 || colIndices['Category'] === -1 || colIndices['AssetName/Description'] === -1) {
+                showToast('Error: Headers must include "AssetNumber", "Category", and "AssetName/Description".', true);
                 return;
             }
 
@@ -1478,14 +1494,11 @@
             processImportBtn.disabled = true;
             processImportBtn.textContent = 'Importing...';
 
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i];
-                if (!line) continue;
+            for (let i = 1; i < rows.length; i++) {
+                const values = rows[i];
+                if (values.length < header.length) continue; // Skip malformed rows
 
-                // Basic CSV parsing (does not handle commas within quotes)
-                const values = line.split(','); 
-
-                const assetCode = values[colIndices.assetCode] ? values[colIndices.assetCode].trim() : '';
+                const assetCode = values[colIndices['AssetNumber']] || '';
                 if (!assetCode) continue;
 
                 if (existingAssetCodes.has(assetCode)) {
@@ -1498,25 +1511,25 @@
                 const assetPrefix = lastSlash > -1 ? assetCode.substring(0, lastSlash + 1) : 'other';
                 const assetNumber = lastSlash > -1 ? assetCode.substring(lastSlash + 1) : assetCode;
 
-                const csvStatus = values[colIndices.status] ? values[colIndices.status].trim() : 'In Stock';
+                const csvStatus = values[colIndices['Status']] || 'In Stock';
                 const appStatus = (csvStatus === 'Used' || csvStatus === 'Issued') ? 'Issued' : 'In Stock';
                 
                 const assetData = {
                     assetPrefix: assetPrefix,
                     assetNumber: assetNumber,
-                    category: values[colIndices.assetName] ? values[colIndices.assetName].trim() : 'Other',
-                    assetName: values[colIndices.notes] ? values[colIndices.notes].trim() : '', // CSV 'Notes' -> App 'AssetName'
-                    assetMake: values[colIndices.makeModel] ? values[colIndices.makeModel].trim() : '',
-                    assetSerial: values[colIndices.serial] ? values[colIndices.serial].trim() : '',
+                    category: values[colIndices['Category']] || 'Other',
+                    assetName: values[colIndices['AssetName/Description']] || '',
+                    assetMake: values[colIndices['Make/Model']] || '',
+                    assetSerial: values[colIndices['Serial No']] || '',
                     status: appStatus,
-                    employeeName: appStatus === 'Issued' ? (values[colIndices.assignedTo] ? values[colIndices.assignedTo].trim() : '') : '',
-                    employeeCode: '', // Not in CSV
-                    cugMobile: values[colIndices.cug] ? values[colIndices.cug].trim() : '',
-                    department: '', // NEW Field - Not in CSV
-                    designation: values[colIndices.designation] ? values[colIndices.designation].trim() : '',
-                    location: values[colIndices.location] ? values[colIndices.location].trim() : 'HO',
-                    date: values[colIndices.date] ? values[colIndices.date].trim() : new Date().toISOString().split('T')[0],
-                    notes: '' // NEW Field - Not in CSV
+                    employeeName: appStatus === 'Issued' ? (values[colIndices['Employee Name']] || '') : '',
+                    employeeCode: appStatus === 'Issued' ? (values[colIndices['Employee Code']] || '') : '',
+                    cugMobile: values[colIndices['CUG Mobile']] || '',
+                    department: values[colIndices['Department']] || '',
+                    designation: values[colIndices['Designation']] || '',
+                    location: values[colIndices['Location']] || 'HO',
+                    date: values[colIndices['Date']] || new Date().toISOString().split('T')[0],
+                    notes: values[colIndices['Notes']] || ''
                 };
                 
                 try {
@@ -1529,14 +1542,16 @@
                     if (response.ok) {
                         const savedAsset = await response.json();
                         state.assets.push(savedAsset);
-                        existingAssetCodes.add(assetCode); // Add to set to prevent duplicates in same run
+                        existingAssetCodes.add(assetCode);
                         successCount++;
                     } else {
+                        const err = await response.json();
+                        console.error('Import error for asset:', assetCode, err.error);
                         errorCount++;
                     }
                 } catch (err) {
                     errorCount++;
-                    console.error('Import error for asset:', assetCode, err);
+                    console.error('Import fetch error for asset:', assetCode, err);
                 }
             }
             
@@ -1554,3 +1569,5 @@
     </script>
 </body>
 </html>
+
+       
