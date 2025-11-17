@@ -718,38 +718,16 @@ async function authFetch(url, opts = {}) {
                     loginError.textContent = err.error || 'Invalid username or password.';
                     loginError.classList.remove('hidden');
                 }
-            } catch (err) {
-                console.error('Login fetch error:', err);
-                loginError.textContent = 'Cannot connect to server. Is it running?';
-                loginError.classList.remove('hidden');
-            } finally {
-                setLoginLoading(false);
             }
-        }
 
-        
-async function handleLogin(e) {
-    e.preventDefault();
-    setLoginLoading(true);
-    loginError.classList.add('hidden');
-
-    const username = $('#username').value;
-    const password = $('#password').value;
-
-    try {
-        const response = await fetch(`${API_URL}/api/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
 
 async function handleLogin(e) {
-    e.preventDefault();
-    setLoginLoading(true);
-    loginError.classList.add('hidden');
+    e && e.preventDefault();
+    setLoginLoading && setLoginLoading(true);
+    loginError && loginError.classList.add('hidden');
 
-    const username = $('#username').value;
-    const password = $('#password').value;
+    const username = ($('#username') && $('#username').value) || '';
+    const password = ($('#password') && $('#password').value) || '';
 
     try {
         const response = await fetch(`${API_URL}/api/login`, {
@@ -760,69 +738,81 @@ async function handleLogin(e) {
 
         if (!response.ok) {
             const err = await response.json().catch(() => ({ error: 'Login failed' }));
-            loginError.textContent = err.error || 'Invalid username or password.';
-            loginError.classList.remove('hidden');
+            if (loginError) {
+                loginError.textContent = err.error || 'Invalid username or password.';
+                loginError.classList.remove('hidden');
+            }
             return;
         }
 
         const body = await response.json(); // expected { token, user }
         if (!body || !body.token || !body.user) {
-            loginError.textContent = 'Invalid login response from server.';
-            loginError.classList.remove('hidden');
+            if (loginError) {
+                loginError.textContent = 'Invalid login response from server.';
+                loginError.classList.remove('hidden');
+            }
             return;
         }
 
         saveAuth(body.token, body.user);
 
-        setMainLoading(true);
+        setMainLoading && setMainLoading(true);
         try {
             await loadInitialData();
-            renderUI();
-            showToast(`Welcome, ${body.user.username}!`);
+            renderUI && renderUI();
+            showToast && showToast(`Welcome, ${body.user.username || 'User'}!`);
         } catch (loadErr) {
             console.error('Failed to load initial data after login:', loadErr);
             clearAuth();
-            loginError.textContent = 'Login succeeded but failed to load app data. Try again.';
-            loginError.classList.remove('hidden');
-            renderUI();
+            if (loginError) {
+                loginError.textContent = 'Login succeeded but failed to load app data. Try again.';
+                loginError.classList.remove('hidden');
+            }
+            renderUI && renderUI();
         } finally {
-            setMainLoading(false);
+            setMainLoading && setMainLoading(false);
         }
     } catch (err) {
         console.error('Login fetch error:', err);
-        loginError.textContent = 'Cannot connect to server. Is it running?';
-        loginError.classList.remove('hidden');
+        if (loginError) {
+            loginError.textContent = 'Cannot connect to server. Is it running?';
+            loginError.classList.remove('hidden');
+        }
     } finally {
-        setLoginLoading(false);
+        setLoginLoading && setLoginLoading(false);
     }
 }
 
 
+
+
 async function loadInitialData() {
-            try {
-                const [assetsRes, usersRes] = await Promise.all([
-                    authFetch(`${API_URL}/api/assets`);
+    try {
+        const assetsRes = await authFetch(`${API_URL}/api/assets`);
+        if (!assetsRes.ok) throw new Error('Failed to load assets');
+        state.assets = await assetsRes.json();
 
-                if (!assetsRes.ok) throw new Error('Failed to load assets');
-                
-                state.assets = await assetsRes.json();
-                
-                if (usersRes && usersRes.ok) {
-                    state.users = await usersRes.json();
-                } else {
-                    state.users = [];
-                }
-                
-                state.assets.sort((a, b) => a.id - b.id);
-                state.users.sort((a, b) => a.id - b.id);
-
-            } catch (err) {
-                console.error('Data loading error:', err);
-                showToast('Error loading data from database.', true);
-                // Rethrow so caller (checkPersistedLogin or handleLogin) can decide what to do
-                throw err;
+        // Load users only for admins
+        if (state.currentUser && state.currentUser.role === 'admin') {
+            const usersRes = await authFetch(`${API_URL}/api/users`);
+            if (usersRes && usersRes.ok) {
+                state.users = await usersRes.json();
+            } else {
+                state.users = [];
             }
+        } else {
+            state.users = [];
         }
+
+        state.assets.sort((a, b) => (a.id || 0) - (b.id || 0));
+        state.users.sort((a, b) => (a.id || 0) - (b.id || 0));
+    } catch (err) {
+        console.error('Data loading error:', err);
+        showToast && showToast('Error loading data from database.', true);
+        throw err;
+    }
+}
+
 
         function handleLogout() {
             const username = state.currentUser ? state.currentUser.username : 'User';
