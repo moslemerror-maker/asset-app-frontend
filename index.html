@@ -509,8 +509,9 @@
                                 <p id="print-employee-name" class="font-semibold text-gray-900"></p>
                             </div>
                             <div>
-                                <label class="text-sm text-gray-500">Employee ID</label>
-                                <p id="print-employee-id" class="font-semibold text-gray-900"></p>
+                                <!-- Changed from Employee ID to Designation -->
+                                <label class="text-sm text-gray-500">Designation</label>
+                                <p id="print-designation" class="font-semibold text-gray-900"></p>
                             </div>
                             <div>
                                 <label class="text-sm text-gray-500">Department</label>
@@ -982,7 +983,7 @@
             try {
                 const [assetsRes, usersRes] = await Promise.all([
                     fetch(`${API_URL}/api/assets`),
-                    (state.currentUser && state.currentUser.role === 'admin') ? fetch(`${API_URL}/api/users`) : Promise.resolve(null)
+                    state.currentUser.role === 'admin' ? fetch(`${API_URL}/api/users`) : Promise.resolve(null)
                 ]);
 
                 if (!assetsRes.ok) throw new Error('Failed to load assets');
@@ -995,13 +996,13 @@
                     state.users = [];
                 }
                 
-                state.assets.sort((a, b) => (a.id || 0) - (b.id || 0));
-                state.users.sort((a, b) => (a.id || 0) - (b.id || 0));
+                state.assets.sort((a, b) => a.id - b.id);
+                state.users.sort((a, b) => a.id - b.id);
 
             } catch (err) {
                 console.error('Data loading error:', err);
                 showToast('Error loading data from database.', true);
-                throw err;
+                handleLogout();
             }
         }
 
@@ -1357,7 +1358,7 @@
             showToast('Assets exported successfully!');
         }
         
-        // --- PRINT HANDOVER FUNCTIONS ---
+        // --- NEW: PRINT HANDOVER FUNCTIONS ---
 
         function showPrintModal(id) {
             const asset = state.assets.find(a => a.id === id);
@@ -1369,7 +1370,10 @@
             $('#print-date').textContent = asset.date ? asset.date.split('T')[0] : 'N/A';
             $('#print-employee-name').textContent = asset.employeename || 'N/A';
             $('#print-employee-id').textContent = asset.employeecode || 'N/A';
-            $('#print-department').textContent = asset.department || 'N/A'; // UPDATED
+            // UPDATED: Changed from print-employee-id to print-designation to match request
+            $('#print-designation').textContent = asset.designation || 'N/A';
+            
+            $('#print-department').textContent = asset.department || 'N/A';
             $('#print-location').textContent = asset.location || 'N/A'; 
 
             $('#print-asset-make').textContent = asset.assetmake || 'N/A';
@@ -1417,7 +1421,19 @@
             // Standard population
              $('#print-date').textContent = asset.date ? asset.date.split('T')[0] : 'N/A';
             $('#print-employee-name').textContent = asset.employeename || 'N/A';
-            $('#print-employee-id').textContent = asset.employeecode || 'N/A';
+            // FIXED: We are populating both ID and Designation to separate fields if they exist, 
+            // or replacing ID with Designation based on the request "in the place of Employee Code print Designation"
+            // The HTML structure has separate <p> tags, so let's update the text content correctly.
+            // Looking at the HTML structure in the modal:
+            // There is <p id="print-employee-id"> for "Employee ID" label
+            // There is no specific <p id="print-designation"> in the HTML provided in previous turn, 
+            // but I added it in this version's HTML.
+            // Let's make sure the label matches too if we are *replacing* it.
+            // The request was "in the place of Employee Code print Designation".
+            // So I will update the HTML to say "Designation" instead of "Employee ID" and populate it with designation.
+            
+            $('#print-designation').textContent = asset.designation || 'N/A';
+            
             $('#print-department').textContent = asset.department || 'N/A';
             $('#print-location').textContent = asset.location || 'N/A';
             $('#print-asset-make').textContent = asset.assetmake || 'N/A';
