@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script>
         tailwind.config = {
-            darkMode: 'class', // Enable dark mode via class
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -31,13 +31,9 @@
 
         .required-label::after { content: '*'; color: red; margin-left: 2px; }
         
-        /* Stat Card Animation */
-        .stat-card {
-            transition: all 0.2s ease-in-out;
-        }
+        .stat-card { transition: all 0.2s ease-in-out; }
         .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        /* Spinner */
         .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
             border-left-color: #4f46e5; border-radius: 50%;
@@ -50,53 +46,76 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* PRINT STYLES */
+        /* --- REVISED PRINT STYLES (Strict A4 Fit) --- */
         @media print {
-            body * {
-                visibility: hidden;
-            }
             @page {
-                margin: 0.5cm;
-                size: auto;
+                size: A4;
+                margin: 0; /* Remove default browser margins */
             }
+            
+            body * {
+                visibility: hidden; /* Hide everything by default */
+            }
+            
             html, body {
-                height: auto;
+                height: 100%;
+                width: 100%;
                 margin: 0 !important;
                 padding: 0 !important;
-                overflow: visible;
+                overflow: hidden !important;
                 background: #fff !important;
-                color: #000 !important; /* Force black text */
             }
+
+            /* Make the print modal and its content visible */
             #print-modal, #print-modal-content, #printable-handover-form, #printable-handover-form * {
                 visibility: visible;
             }
+
             #print-modal {
                 position: absolute;
                 left: 0;
                 top: 0;
                 width: 100%;
-                margin: 0;
-                padding: 0;
+                height: 100%;
+                margin: 0 !important;
+                padding: 0 !important;
                 z-index: 9999;
+                background: white;
             }
+            
             #print-modal-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 210mm !important; /* A4 Width */
+                max-width: 210mm !important;
                 box-shadow: none !important;
                 border: none !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                background: white !important; /* Ensure white background */
+                margin: 0 !important;
+                padding: 0 !important;
+                /* Optional: Scale down to ensure fit if margins are issue */
+                transform: scale(0.95); 
+                transform-origin: top left;
             }
+
             #printable-handover-form {
                 width: 100% !important;
                 margin: 0 !important;
-                padding: 0 !important;
+                padding: 15mm !important; /* 1.5cm padding for the actual content */
             }
+
+            /* Explicitly hide UI elements */
             #app, #chatbot-button, #chatbot-window, #toast, .modal-overlay, #print-modal-buttons, #print-options {
                 display: none !important;
             }
+
             .print-avoid-break {
                 page-break-inside: avoid;
             }
+            
+            table { border-collapse: collapse !important; width: 100% !important; }
+            td, th { border: 1px solid #000 !important; padding: 4px !important; font-size: 10pt !important; }
+            p, span, div { color: #000 !important; }
         }
 
         /* Chatbot Styles */
@@ -676,7 +695,10 @@
             editingAssetId: null,
             editingUserId: null,
             assetFilter: '',
-            printCug: false // State to track CUG printing
+            printCug: false, // State to track CUG printing
+            // Add idle timer variables
+            idleTimer: null,
+            idleTime: 60000 // 1 minute in milliseconds
         };
 
         // --- DOM ELEMENT SELECTORS ---
@@ -836,6 +858,19 @@
                     handleDeleteUser(id);
                 }
             });
+
+            // Initial idle timer setup
+            resetIdleTimer();
+            document.addEventListener('mousemove', resetIdleTimer);
+            document.addEventListener('keypress', resetIdleTimer);
+        }
+
+        // --- IDLE TIMER FUNCTIONS (NEW) ---
+        function resetIdleTimer() {
+            clearTimeout(state.idleTimer);
+            if (state.currentUser) { // Only run timer if logged in
+                state.idleTimer = setTimeout(handleLogout, state.idleTime);
+            }
         }
 
         // --- THEME FUNCTIONS (NEW) ---
@@ -871,6 +906,7 @@
                 }
                 renderDashboardStats();
                 renderAssetTable();
+                resetIdleTimer(); // Start timer on login
             } else {
                 loginView.classList.remove('hidden');
                 mainView.classList.add('hidden');
@@ -878,6 +914,7 @@
                 loginError.classList.add('hidden');
                 loginError.textContent = '';
                 loginForm.reset();
+                clearTimeout(state.idleTimer); // Stop timer on logout
             }
         }
         
@@ -983,7 +1020,7 @@
             try {
                 const [assetsRes, usersRes] = await Promise.all([
                     fetch(`${API_URL}/api/assets`),
-                    state.currentUser.role === 'admin' ? fetch(`${API_URL}/api/users`) : Promise.resolve(null)
+                    (state.currentUser && state.currentUser.role === 'admin') ? fetch(`${API_URL}/api/users`) : Promise.resolve(null)
                 ]);
 
                 if (!assetsRes.ok) throw new Error('Failed to load assets');
@@ -1565,7 +1602,7 @@
                 if (isEditing) {
                     const index = state.users.findIndex(u => u.id === state.editingUserId);
                     if (index !== -1) {
-                        state.users[index] = Object.assign({}, state.users[index], savedUser);
+                        state.users[index] = { ...state.users[index], ...savedUser };
                     }
                 } else {
                     state.users.push(savedUser);
