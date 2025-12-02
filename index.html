@@ -550,8 +550,6 @@
                             <thead class="bg-gray-100 border-b border-gray-300">
                                 <tr>
                                     <th class="px-4 py-2 text-left text-sm font-medium text-gray-600 border-r border-gray-300">Sl No.</th>
-                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600 border-r border-gray-300">Category</th>
-                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600 border-r border-gray-300">Asset Name/Desc</th>
                                     <th class="px-4 py-2 text-left text-sm font-medium text-gray-600 border-r border-gray-300">Asset Make/Model</th>
                                     <th class="px-4 py-2 text-left text-sm font-medium text-gray-600 border-r border-gray-300">Asset S/L</th>
                                     <th class="px-4 py-2 text-left text-sm font-medium text-gray-600 border-r border-gray-300">Asset TAG</th>
@@ -563,10 +561,9 @@
                                 <tr class="border-t border-gray-300">
                                     <td class="px-4 py-2 text-sm text-gray-800 border-r border-gray-300">1</td>
                                     <td id="print-asset-make" class="px-4 py-2 text-sm text-gray-800 border-r border-gray-300"></td>
-                                    <td id="print-asset-category" class="px-4 py-2 text-sm text-gray-800 border-r border-gray-300"></td>
-                                    <td id="print-asset-name" class="px-4 py-2 text-sm text-gray-800 border-r border-gray-300"></td>
                                     <td id="print-asset-serial" class="px-4 py-2 text-sm text-gray-800 border-r border-gray-300"></td>
                                     <td id="print-asset-tag" class="px-4 py-2 text-sm text-gray-800 border-r border-gray-300"></td>
+                                    <!-- NEW: Optional CUG Column -->
                                     <td id="print-cug-cell" class="hidden px-4 py-2 text-sm text-gray-800"></td>
                                 </tr>
                             </tbody>
@@ -1417,8 +1414,6 @@
             $('#print-location').textContent = asset.location || 'N/A'; 
 
             $('#print-asset-make').textContent = asset.assetmake || 'N/A';
-            $('#print-asset-category').textContent = asset.category || 'N/A';
-            $('#print-asset-name').textContent = asset.assetname || 'N/A';
             $('#print-asset-serial').textContent = asset.assetserial || 'N/A';
             $('#print-asset-tag').textContent = `${asset.assetprefix}${asset.assetnumber}`;
             
